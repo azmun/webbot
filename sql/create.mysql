@@ -1,0 +1,58 @@
+DROP DATABASE IF EXISTS webbot;
+CREATE DATABASE webbot;
+USE webbot;
+CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	language INT NOT NULL,
+    	abbreviationEnglish VARCHAR(5) NOT NULL,
+	abbreviationSpanish VARCHAR(5) NOT NULL,
+	displayNameEnglish VARCHAR(255),
+	displayNameSpanish VARCHAR(255),
+        userDefinedTopics BOOL NOT NULL);
+
+CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL UNIQUE ,
+	role INT NOT NULL,
+	committeeId INT,
+	language INT NOT NULL,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id));
+
+
+CREATE TABLE Countries(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	englishName VARCHAR(255) NOT NULL ,
+	spanishName VARCHAR(255) NOT NULL,
+	englishLongName VARCHAR(255) NOT NULL,
+	spanishLongName VARCHAR(255) NOT NULL );
+
+CREATE TABLE CommitteeCountries(committeeId INT NOT NULL,
+	countryId INT NOT NULL,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id),
+	FOREIGN KEY (countryId) REFERENCES Countries(id));
+
+CREATE TABLE CommitteeTopics(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	committeeId INT NOT NULL,
+	`index` INT NOT NULL,
+	spanishName VARCHAR(255) ,
+	englishName VARCHAR(255) ,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id),
+	UNIQUE KEY (committeeId, `index`));
+CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	serializedResolutionObjectEnglish TEXT,
+    serializedResolutionObjectSpanish TEXT,
+	topicId INT NOT NULL,
+	`status` INT NOT NULL,
+	`index` INT NOT NULL,
+	assigneeId INT,
+	originalAssigneeId INT,
+	ownerId INT NOT NULL,
+	comments TEXT,
+        selectedLanguage INT,
+	FOREIGN KEY (topicId) REFERENCES CommitteeTopics(`id`),
+	FOREIGN KEY (assigneeId) REFERENCES Users(id),
+	FOREIGN KEY (originalAssigneeId) REFERENCES Users(id),
+	FOREIGN KEY (ownerId) REFERENCES Users(id));
+
+CREATE TABLE ResolutionSponsors(resolutionId INT NOT NULL,
+	countryId INT NOT NULL,
+	FOREIGN KEY (resolutionId) REFERENCES Resolutions(id) ON DELETE CASCADE,
+	FOREIGN KEY (countryId) REFERENCES Countries(id));

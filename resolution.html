@@ -1,0 +1,93 @@
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script type="text/javascript" src="js/jquery-1.9.1.min.js">
+		</script>
+        <script type="text/javascript" src="js/jquery-ui.custom.js">
+        </script>
+        <script type="text/javascript" src="js/jquery.dynatree-1.2.4.js">
+        </script>
+        <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+        <script type="text/javascript">
+            var dg = {{dynamicGlobals|safe}}
+            var ev = {{enumValues|safe}}
+            var rev = {{reverseEnumValues|safe}}
+            /* googChannel = new  goog.appengine.Channel({{token|safe}});
+            googSocket = googChannel.open();
+            googSocket.onerror = onSocketError;
+            googSocket.onclose = fixSocket;
+            googSocket.onmessage = handleMessage; */
+            
+            for (x in dg)
+            {
+                if (dg.hasOwnProperty(x))
+                {
+                    window[x] = dg[x];
+                }
+            }
+            for (x in ev)
+            {
+                if (ev.hasOwnProperty(x))
+                {
+                    window[x] = ev[x];
+                }
+            }
+            window["reverseEnums"] = {};
+            for (x in rev)
+            {
+                if (rev.hasOwnProperty(x))
+                {
+                    window["reverseEnums"][x] = rev[x];
+                }
+            }
+        </script>
+        <style>
+            .content
+            {
+                vertical-align: top;
+            }
+        </style>
+		<script type="text/javascript" src="js/resolution.js">
+		</script>
+	</head>
+	<body>
+		<div id="container">
+                    <div style="width:300px;float:left;">
+                        <div>
+                    {{newIfCan|safe}}
+                        </div>
+                        <div>
+                    {{newTopicIfCan|safe}}
+                        </div>
+                        <div>
+                            <a href="{{logout|safe}}">logout</a>
+                        </div>
+                        <div id="menu">
+				<p>No resolutions yet.</p>
+			</div>
+                    </div>
+			<div id="content" style="float:left;">
+                            <form id="languageChoice"><input type="radio" name="language" value="0" checked disabled/> English <input type="radio" name="language" value="1" disabled /> Spanish</form>
+                            <input type="button" id="generateFormattedVersion" value="Generate formatted version" disabled></input>
+				<div id="clauses">
+					<div id="preambulars">
+						<p>No resolution selected.</p>
+					</div>
+					<div id="operatives">
+					</div>
+				</div>
+				<div id="sponsors">
+				</div>
+				<div>
+					<p>Comments:</p>
+                    <textarea id="comments" rows="20" cols="80" disabled>
+                    </textarea>
+				</div>
+				<div id="actions">
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+			
+				  

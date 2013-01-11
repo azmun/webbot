@@ -1,0 +1,1 @@
+(ENGLISH, SPANISH, BILINGUAL) = range(3)
