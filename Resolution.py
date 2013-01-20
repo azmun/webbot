@@ -65,7 +65,7 @@ class OperativeMainClause(MainClause):
 
 (RESOLUTION_VALID, NOT_ENOUGH_CLAUSES, NO_SPONSORS, KEYWORDS_MISSING) = range(4)
 class Resolution:
-    def resolutionToOdtOutline(res):
+    def toOdtOutline(res):
         def getOperRecursive(clause, depth):
             has_children = len(clause.subclauses) > 0
             if has_children:
