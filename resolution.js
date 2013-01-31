@@ -1,3 +1,7 @@
+Array.prototype.insert = function (index, item) {
+	this.splice(index, 0, item);
+};
+
 function _bind(i, f)
 {
 	return function() {
@@ -60,6 +64,7 @@ function insertPreambularBefore(index)
 	var toAdd = getPreambularToAdd(index, '', '');
 	$(".preambular").eq(index).before(toAdd);
 	$(".preambular").gt(index).each(bindPreambular);
+	window.res.preambulars.insert({keyword: '', content: ''});
 }
 
 function insertOperativeBefore(index)
@@ -79,6 +84,12 @@ function insertOperativeBefore(index)
 	var toAdd = getOperativeToAdd(index, level, '', '');
 	where.before(toAdd);
 	$(".operative").gt(index).each(bindOperative);
+	var clauseObj = {keyword: '', content: ''};
+	var op = window.res.operatives[index];
+	clauseObj.stepUp = op.stepUp;
+	clauseObj.stepDown = op.stepDown;
+	op.stepUp = 0;
+	op.stepDown = false;
 }
 
 function populateResolution(resolution)
