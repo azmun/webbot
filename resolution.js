@@ -4,6 +4,43 @@ function _bind(i, f)
 		f(i);
 	}
 }
+
+function bindPreambular(index, elt)
+{
+	elt.find(".insertBeforeButton").click(_bind(i, insertPreambularBefore));
+	elt.find(".keyword").change(_bind(i, changePreambularKeyword));
+	elt.find(".content").change(_bind(i, changePreambularContent));
+	elt.find(".deleteButton").click(_bind(i, deletePreambular));
+}
+
+function getPreambularToAdd(index, keyword, content)
+{
+	var toAdd = $('<p class="preambular"><input type="button" class="insertBeforeAction" value="Insert new clause here" /><input type="text" class="keyword" style="width:50px" /><input type="text" class="content" style="width:200px" /><input type="button" class="deleteButton" value="Delete clause" /></p>');
+	toAdd.find(".keyword").val(keyword);
+	toAdd.find(".content").val(content);
+	bindPreambular(index, toAdd);
+	return toAdd;
+}
+
+function insertPreambularBefore(index)
+{
+	if (!window.res)
+	{
+		_fuckup("window.res evaluates to false in insertPreambularBefore(" + index + ")");
+		return;
+	}
+	if (index >= res.preambulars.length)
+	{
+		_fuckup("tried to insert preambular before " + index + "but length is " + res.preambulars.length);
+		return;
+	}
+	var toAdd = getPreambularToAdd(index, '', '');
+	$(".preambular").eq(index).before(toAdd);
+	$(".preambular").gt(index).each(function(i, e) {
+		bindPreambular(i, e);
+	});
+}
+
 function populateResolution(resolution)
 {
 	window.res = resolution;
@@ -11,21 +48,7 @@ function populateResolution(resolution)
 	$("#operatives").empty();
 	for (var i = 0; i < resolution.preambulars.length; ++i)
 	{
-		var toAdd = $("<p></p>");
-		var insertButton = $('<input type="button" value="Insert new clause here" />');
-		insertButton.click(_bind(i, insertPreambularBefore));
-		toAdd.append(insertButton);
-		var keyword = $('<input type="text" style="width:50px" />');
-		keyword.val(resolution.preambulars[i].keyword);
-		keyword.change(_bind(i, changePreambularKeyword));
-		toadd.append(keyword);
-		var content = $('<input type="text" style="width:200px" />');
-		content.val(resolution.preambulars[i].content);
-		content.change(_bind(i, changePreambularContent));
-		toadd.append(content);
-		var deleteButton = $('<input type="button" value="Delete clause" />');
-		deleteButton.click(_bind(i, deletePreambular));
-		toAdd.append(deleteButton);
+		var toAdd = getPreambularToAdd(i, resolution.preambulars[i].keyword, resolution.preambulars[i].content);
 		$("#preambulars").append(toAdd);
 	}
 	var newClauseButton = $('<input type="button" value="Insert new preambular clause" />');
