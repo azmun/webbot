@@ -1,6 +1,12 @@
 Array.prototype.insert = function (index, item) {
 	this.splice(index, 0, item);
 };
+// Array Remove - By John Resig (MIT Licensed)
+Array.remove = function (array, from, to) {
+	var rest = array.slice((to || from) + 1 || array.length);
+	array.length = from < 0 ? array.length + from : from;
+	return array.push.apply(array, rest);
+};
 
 function _bind(i, f)
 {
@@ -90,6 +96,23 @@ function insertOperativeBefore(index)
 	clauseObj.stepDown = op.stepDown;
 	op.stepUp = 0;
 	op.stepDown = false;
+}
+
+function deletePreambular(index)
+{
+	if (!window.res)
+	{
+		_fuckup("window.res evaluates to false in deletePreambular(" + index + ")");
+		return;
+	}
+	if (index >= res.preambulars.length)
+	{
+		_fuckup("tried to delete preambular at " + index + "but length is " + res.preambulars.length);
+		return;
+	}
+	$(".preambular").eq(index).remove();
+	$(".preambular").gt(index - 1).each(bindPreambular);
+	window.res.preambulars.remove(index);
 }
 
 function populateResolution(resolution)
