@@ -5,7 +5,7 @@ function _bind(i, f)
 	}
 }
 
-function bindPreambular(index, elt)
+function bindPreambular(i, elt)
 {
 	elt.find(".insertBeforeButton").click(_bind(i, insertPreambularBefore));
 	elt.find(".keyword").change(_bind(i, changePreambularKeyword));
@@ -13,13 +13,34 @@ function bindPreambular(index, elt)
 	elt.find(".deleteButton").click(_bind(i, deletePreambular));
 }
 
+function bindOperative(i, elt)
+{
+	elt.find('.insertBeforeButton').click(_bind(i, insertOperativeBefore));
+	elt.find('.keyword').change(_bind(i, changeOperativeKeyword)); // may not exist but jquery is dgaf in that case
+	elt.find('.content').change(_bind(i, changeOperativeContent));
+	elt.find('.newSubclauseButton').click(_bind(i, newOperativeIn));
+}
+
 function getPreambularToAdd(index, keyword, content)
 {
-	var toAdd = $('<p class="preambular"><input type="button" class="insertBeforeAction" value="Insert new clause here" /><input type="text" class="keyword" style="width:50px" /><input type="text" class="content" style="width:200px" /><input type="button" class="deleteButton" value="Delete clause" /></p>');
+	var toAdd = $('<p class="preambular"><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="keyword" style="width:50px" /><input type="text" class="content" style="width:200px" /><input type="button" class="deleteButton" value="Delete clause" /></p>');
 	toAdd.find(".keyword").val(keyword);
 	toAdd.find(".content").val(content);
 	bindPreambular(index, toAdd);
 	return toAdd;
+}
+
+function getOperativeToAdd(index, level, keyword, content)
+{
+	var toAdd = $('<p><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
+	toAdd.attr('margin-left', index * 10);
+	var contentElement = toAdd.find('.content');
+	contentElement.val(content):
+	if (level == 0)
+	{
+		contentElement.before($('<input type="text" class="keyword" style="width:50px" />').val(keyword));
+	}
+	
 }
 
 function insertPreambularBefore(index)
@@ -81,23 +102,7 @@ function populateResolution(resolution)
 		{
 			steps -= op.stepUp;
 		}
-		var toAdd = $("<p></p>");
-		toAdd.css("margin-left", 10 * steps);
-		var insertButton = $('<input type="button" value="Insert new clause here" />');
-		insertButton.click(_bind(i, insertOperativeBefore));
-		toAdd.append(insertButton);
-		if (steps == 0)
-		{
-			var keyword = $('<input type="text" style="width:50px" />');
-			keyword.change(_bind(i, changeOperativeKeyword));
-			toAdd.append(keyword);
-		}
-		var content = $('<input type="text" style="width:200px" />');
-		content.change(_bind(i, changeOperativeContent));
-		toAdd.append(content);
-		var addNew = $('<input type="button" value="Add new subclause" />');
-		addNew.click(_bind(i, newOperativeIn));
-		toAdd.append(addNew);
+		var toAdd = getOperativeToAdd(i, steps, op.keyword, op,content); //keyword may not exist, but it's dgaf
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
