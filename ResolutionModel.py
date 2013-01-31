@@ -1,0 +1,2 @@
+class ResolutionModel(db.Model):
+
