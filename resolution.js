@@ -32,15 +32,17 @@ function getPreambularToAdd(index, keyword, content)
 
 function getOperativeToAdd(index, level, keyword, content)
 {
-	var toAdd = $('<p><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
+	var toAdd = $('<p class="operative"><input type="hidden" class="level" /><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
 	toAdd.attr('margin-left', index * 10);
 	var contentElement = toAdd.find('.content');
-	contentElement.val(content):
+	contentElement.val(content);
+	toAdd.find('.level').val(level);
 	if (level == 0)
 	{
 		contentElement.before($('<input type="text" class="keyword" style="width:50px" />').val(keyword));
 	}
-	
+	bindOperative(index, toAdd);
+	return toAdd;
 }
 
 function insertPreambularBefore(index)
@@ -57,9 +59,26 @@ function insertPreambularBefore(index)
 	}
 	var toAdd = getPreambularToAdd(index, '', '');
 	$(".preambular").eq(index).before(toAdd);
-	$(".preambular").gt(index).each(function(i, e) {
-		bindPreambular(i, e);
-	});
+	$(".preambular").gt(index).each(bindPreambular);
+}
+
+function insertOperativeBefore(index)
+{
+	if (!window.res)
+	{
+		_fuckup("window.res evaluates to false in insertOperativeBefore(" + index + ")");
+		return;
+	}
+	if (index >= res.operatives.length)
+	{
+		_fuckup("tried to insert operative before " + index + "but length is " + res.operatives.length);
+		return;
+	}
+	var where = $(".operative").eq(index);
+	var level = where.find('.level').val();
+	var toAdd = getOperativeToAdd(index, level, '', '');
+	where.before(toAdd);
+	$(".operative").gt(index).each(bindOperative);
 }
 
 function populateResolution(resolution)
