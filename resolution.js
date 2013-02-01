@@ -25,6 +25,7 @@ function bindOperative(i, elt)
 {
 	elt.find('.insertBeforeButton').off("click").on("click", _bind(i, insertOperativeBefore));
 	elt.find('.newSubclauseButton').off("click").on("click", _bind(i, newOperativeIn));
+	elt.find('.deleteButton').off("click").on("click", _bind(i, deleteOperative));
 }
 
 function getPreambularToAdd(index, keyword, content)
@@ -38,7 +39,7 @@ function getPreambularToAdd(index, keyword, content)
 
 function getOperativeToAdd(index, level, keyword, content)
 {
-	var toAdd = $('<p class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
+	var toAdd = $('<p class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /><input type="button" class="deleteButton" value="Delete clause (and all subclauses") /></p>');
 	toAdd.data('level', level);
 	toAdd.css('margin-left', level * 10);
 	var contentElement = toAdd.find('.content');
@@ -120,9 +121,8 @@ function deletePreambular(index)
 function deleteOperative(index)
 {
 	var howManyToDelete = 1;
-	var steps = 0;
-	var oldLevel = $(".preambular").eq(index).data("level");
-	$(".preambular").slice(index + 1).each(
+	var oldLevel = $(".operative").eq(index).data("level");
+	$(".operative").slice(index + 1).each(
 		function ()
 		{
 			if ($(this).data("level") > oldLevel)
