@@ -62,7 +62,7 @@ function insertPreambularBefore(index)
 		_fuckup("window.res evaluates to false in insertPreambularBefore(" + index + ")");
 		return;
 	}
-	if (index >= res.preambulars.length)
+	if (index >= window.res.preambulars.length)
 	{
 		_fuckup("tried to insert preambular before " + index + "but length is " + res.preambulars.length);
 		return;
@@ -80,7 +80,7 @@ function insertOperativeBefore(index)
 		_fuckup("window.res evaluates to false in insertOperativeBefore(" + index + ")");
 		return;
 	}
-	if (index >= res.operatives.length)
+	if (index >= window.res.operatives.length)
 	{
 		_fuckup("tried to insert operative before " + index + "but length is " + res.operatives.length);
 		return;
@@ -105,7 +105,7 @@ function deletePreambular(index)
 		_fuckup("window.res evaluates to false in deletePreambular(" + index + ")");
 		return;
 	}
-	if (index >= res.preambulars.length)
+	if (index >= window.res.preambulars.length)
 	{
 		_fuckup("tried to delete preambular at " + index + "but length is " + res.preambulars.length);
 		return;
@@ -113,6 +113,70 @@ function deletePreambular(index)
 	$(".preambular").eq(index).remove();
 	$(".preambular").gt(index - 1).each(bindPreambular);
 	window.res.preambulars.remove(index);
+}
+
+function deleteOperative(index)
+{
+	if (!window.res)
+	{
+		_fuckup("window.res evaluates to false in deleteOperative(" + index + ")");
+		return;
+	}
+	var ops = window.res.operatives;
+	if (index >= ops.length)
+	{
+		_fuckup("tried to delete operative at " + index + "but length is " + res.operatives.length);
+		return;
+	}
+	var howManyToDelete = 1;
+	var steps = 0;
+	var oldSteps = -ops[index].stepUp;
+	if (ops[index].stepDown)
+	{
+		oldSteps = 1;
+	}
+	for (var i = index + 1; i < ops.length; ++i)
+	{
+		if (ops[i].stepDown)
+		{
+			++steps;
+		}
+		else if (ops[i].stepUp)
+		{
+			steps -= ops[i].stepUp;
+		}
+		if (steps > 0)
+		{
+			++howManyToDelete;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	$(".operative").gt(index - 1).lt(howManyToDelete).remove();
+	$(".operative").gt(index - 1).each(bindOperative);
+	ops.splice(index, howManyToDelete);
+	if (index < ops.length)
+	{
+		var newSteps = oldSteps + steps;
+		if (newSteps == 1)
+		{
+			ops[index].stepDown = true;
+			ops[index].stepUp = 0;
+		}
+		else if (newSteps == 0)
+		{
+			ops[index].stepDown = false;
+			ops[index].stepUp = 0;
+		}
+		else if (newSteps < 0)
+		{
+			ops[index].stepDown = false;
+			ops[index].stepUp = -newSteps;
+		}
+	}
 }
 
 function populateResolution(resolution)
