@@ -42,11 +42,11 @@ function getPreambularToAdd(index, keyword, content)
 
 function getOperativeToAdd(index, level, keyword, content)
 {
-	var toAdd = $('<p class="operative"><input type="hidden" class="level" /><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
+	var toAdd = $('<p class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
+	toAdd.data('level', level);
 	toAdd.attr('margin-left', index * 10);
 	var contentElement = toAdd.find('.content');
 	contentElement.val(content);
-	toAdd.find('.level').val(level);
 	if (level == 0)
 	{
 		contentElement.before($('<input type="text" class="keyword" style="width:50px" />').val(keyword));
@@ -57,143 +57,56 @@ function getOperativeToAdd(index, level, keyword, content)
 
 function newPreambular()
 {
-	if (!window.res)
-	{
-		_fuckup("window.res evaluates to false in newPreambular()");
-		return;
-	}
 	var toAdd = getPreambularToAdd(window.res.preambulars.length, '', '');
 	$('#newPreambularClauseButton').before(toAdd);
-	window.res.preambulars.push({keyword: '', content: ''});
 }
 
 function insertPreambularBefore(index)
 {
-	if (!window.res)
-	{
-		_fuckup("window.res evaluates to false in insertPreambularBefore(" + index + ")");
-		return;
-	}
-	if (index >= window.res.preambulars.length)
-	{
-		_fuckup("tried to insert preambular before " + index + "but length is " + res.preambulars.length);
-		return;
-	}
 	var toAdd = getPreambularToAdd(index, '', '');
 	$(".preambular").eq(index).before(toAdd);
 	$(".preambular").gt(index).each(bindPreambular);
-	window.res.preambulars.insert({keyword: '', content: ''});
 }
 
 function insertOperativeBefore(index)
 {
-	if (!window.res)
-	{
-		_fuckup("window.res evaluates to false in insertOperativeBefore(" + index + ")");
-		return;
-	}
-	if (index >= window.res.operatives.length)
-	{
-		_fuckup("tried to insert operative before " + index + "but length is " + res.operatives.length);
-		return;
-	}
 	var where = $(".operative").eq(index);
-	var level = where.find('.level').val();
+	var level = where.data('level');
 	var toAdd = getOperativeToAdd(index, level, '', '');
 	where.before(toAdd);
 	$(".operative").gt(index).each(bindOperative);
-	var clauseObj = {keyword: '', content: ''};
-	var op = window.res.operatives[index];
-	clauseObj.stepUp = op.stepUp;
-	clauseObj.stepDown = op.stepDown;
-	op.stepUp = 0;
-	op.stepDown = false;
 }
 
 function deletePreambular(index)
 {
-	if (!window.res)
-	{
-		_fuckup("window.res evaluates to false in deletePreambular(" + index + ")");
-		return;
-	}
-	if (index >= window.res.preambulars.length)
-	{
-		_fuckup("tried to delete preambular at " + index + "but length is " + res.preambulars.length);
-		return;
-	}
 	$(".preambular").eq(index).remove();
 	$(".preambular").gt(index - 1).each(bindPreambular);
-	window.res.preambulars.remove(index);
 }
 
 function deleteOperative(index)
 {
-	if (!window.res)
-	{
-		_fuckup("window.res evaluates to false in deleteOperative(" + index + ")");
-		return;
-	}
-	var ops = window.res.operatives;
-	if (index >= ops.length)
-	{
-		_fuckup("tried to delete operative at " + index + "but length is " + res.operatives.length);
-		return;
-	}
 	var howManyToDelete = 1;
 	var steps = 0;
-	var oldSteps = -ops[index].stepUp;
-	if (ops[index].stepDown)
-	{
-		oldSteps = 1;
-	}
-	for (var i = index + 1; i < ops.length; ++i)
-	{
-		if (ops[i].stepDown)
+	var oldLevel = $(".preambular").eq(index).data("level");
+	$(".preambular").gt(index).each(
+		function ()
 		{
-			++steps;
+			if ($(this).data("level") > oldLevel)
+			{
+				++howManyToDelete;
+			}
+			else
+			{
+				return false;
+			}
 		}
-		else if (ops[i].stepUp)
-		{
-			steps -= ops[i].stepUp;
-		}
-		if (steps > 0)
-		{
-			++howManyToDelete;
-		}
-		else
-		{
-			break;
-		}
-	}
-
+	});
 	$(".operative").gt(index - 1).lt(howManyToDelete).remove();
 	$(".operative").gt(index - 1).each(bindOperative);
-	ops.splice(index, howManyToDelete);
-	if (index < ops.length)
-	{
-		var newSteps = oldSteps + steps;
-		if (newSteps == 1)
-		{
-			ops[index].stepDown = true;
-			ops[index].stepUp = 0;
-		}
-		else if (newSteps == 0)
-		{
-			ops[index].stepDown = false;
-			ops[index].stepUp = 0;
-		}
-		else if (newSteps < 0)
-		{
-			ops[index].stepDown = false;
-			ops[index].stepUp = -newSteps;
-		}
-	}
 }
 
 function populateResolution(resolution)
 {
-	window.res = resolution;
 	$("#preambulars").empty();
 	$("#operatives").empty();
 	for (var i = 0; i < resolution.preambulars.length; ++i)
@@ -204,34 +117,20 @@ function populateResolution(resolution)
 	var newClauseButton = $('<input type="button" id="newPreambularClauseButton" value="Insert new preambular clause" />');
 	newClauseButton.click(newPreambular);
 	$("#preambulars").append(newClauseButton);
-	var steps = 0;
 	for (var i = 0; i < resolution.operatives.length; ++i)
 	{
 		var op = resolution.operatives[i];
-		if (op.stepDown && op.stepUp)
+		if (i == 0 && op.level != 0)
 		{
-			_fuckup("stepdown and stepup set!");
+			_fuckup("nonzero level: " + op.level +" at beginning of ops");
 			return;
 		}
-		if (i == 0 && op.stepDown)
+		if (op.level < 0)
 		{
-			_fuckup("stepdown at beginning of ops");
+			_fuckup("negative level: " + op.level);
 			return;
 		}
-		if (steps - op.stepUp < 0)
-		{
-			_fuckup("step up to negative");
-			return;
-		}
-		if (op.stepDown)
-		{
-			++steps;
-		}
-		else if (op.stepUp > 0)
-		{
-			steps -= op.stepUp;
-		}
-		var toAdd = getOperativeToAdd(i, steps, op.keyword, op,content); //keyword may not exist, but it's dgaf
+		var toAdd = getOperativeToAdd(i, op.level, op.keyword, op,content); //keyword may not exist, but it's dgaf
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
@@ -242,7 +141,6 @@ function populateResolution(resolution)
 
 function removeResolution()
 {
-	window.res = null;
 	$("#preambulars").html("<p>No resolution selected.</p>");
 	$("#operatives").empty();
 	$("#sponsorsBox").val('');
