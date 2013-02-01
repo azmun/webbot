@@ -130,6 +130,12 @@ function deleteOperative(index)
 	$(".operative").gt(index - 1).each(bindOperative);
 }
 
+function getPossibleSponsorsByCommittee(committeeId)
+{
+	//FIXME: fake.
+	return ["Bahrain", "USA", "UK", "Russian Federation", "France", "India", "Québec câliss", "The Federal Republic of Cascadia and Alaska"];
+}
+
 function populateResolution(resolution)
 {
 	$("#preambulars").empty();
