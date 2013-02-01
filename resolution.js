@@ -17,14 +17,14 @@ function _bind(i, f)
 
 function bindPreambular(i, elt)
 {
-	elt.find(".insertBeforeButton").click(_bind(i, insertPreambularBefore));
-	elt.find(".deleteButton").click(_bind(i, deletePreambular));
+	elt.find(".insertBeforeButton").off("click").on("click", _bind(i, insertPreambularBefore));
+	elt.find(".deleteButton").off("click").on("click", _bind(i, deletePreambular));
 }
 
 function bindOperative(i, elt)
 {
-	elt.find('.insertBeforeButton').click(_bind(i, insertOperativeBefore));
-	elt.find('.newSubclauseButton').click(_bind(i, newOperativeIn));
+	elt.find('.insertBeforeButton').off("click").on("click", _bind(i, insertOperativeBefore));
+	elt.find('.newSubclauseButton').off("click").on("click", _bind(i, newOperativeIn));
 }
 
 function getPreambularToAdd(index, keyword, content)
@@ -40,7 +40,7 @@ function getOperativeToAdd(index, level, keyword, content)
 {
 	var toAdd = $('<p class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here" /><input type="text" class="content" style="width:200px" /><input type="button" class="newSubclauseButton" value="Add new subclause" /></p>');
 	toAdd.data('level', level);
-	toAdd.attr('margin-left', index * 10);
+	toAdd.css('margin-left', level * 10);
 	var contentElement = toAdd.find('.content');
 	contentElement.val(content);
 	if (level == 0)
@@ -53,7 +53,7 @@ function getOperativeToAdd(index, level, keyword, content)
 
 function newPreambular()
 {
-	var toAdd = getPreambularToAdd(window.res.preambulars.length, '', '');
+	var toAdd = getPreambularToAdd($('.preambular').length, '', '');
 	$('#newPreambularClauseButton').before(toAdd);
 }
 
@@ -67,14 +67,14 @@ function newOperativeIn(parentIndex)
 	{
 		var parentLevel = $('.operative').eq(parentIndex).data('level');
 		var addBeforeIndex = -1;
-		$('.operative').gt(parentIndex).each(function (i)
+		$('.operative').slice(parentIndex + 1).each(function (i)
 		{
 			if ($(this).data('level') <= parentLevel)
 			{
-				addBeforeIndex = i;
+				addBeforeIndex = parentIndex + 1 + i;
 				return false;
 			}
-		}
+		});
 		if (addBeforeIndex == -1)
 		{
 			$('#newOperativeClauseButton').before(getOperativeToAdd($('.operative').length, parentLevel + 1, '', ''));
@@ -82,6 +82,9 @@ function newOperativeIn(parentIndex)
 		else
 		{
 			$('.operative').eq(addBeforeIndex).before(getOperativeToAdd(addBeforeIndex, parentLevel + 1, '', ''));
+			$('.operative').slice(addBeforeIndex + 1).each(function (i) {
+				bindOperative(addBeforeIndex + 1 + i, $(this));
+			});
 		}
 	}
 }
@@ -90,7 +93,9 @@ function insertPreambularBefore(index)
 {
 	var toAdd = getPreambularToAdd(index, '', '');
 	$(".preambular").eq(index).before(toAdd);
-	$(".preambular").gt(index).each(bindPreambular);
+	$(".preambular").slice(index + 1).each(function (i) {
+		bindPreambular(index + 1 + i, $(this));
+	});
 }
 
 function insertOperativeBefore(index)
@@ -99,13 +104,17 @@ function insertOperativeBefore(index)
 	var level = where.data('level');
 	var toAdd = getOperativeToAdd(index, level, '', '');
 	where.before(toAdd);
-	$(".operative").gt(index).each(bindOperative);
+	$(".operative").slice(index + 1).each(function (i) {
+		bindOperative(index + 1 + i, $(this));
+	});
 }
 
 function deletePreambular(index)
 {
 	$(".preambular").eq(index).remove();
-	$(".preambular").gt(index - 1).each(bindPreambular);
+	$(".preambular").slice(index).each(function (i) {
+		bindPreambular(index + i, $(this));
+	});
 }
 
 function deleteOperative(index)
@@ -113,7 +122,7 @@ function deleteOperative(index)
 	var howManyToDelete = 1;
 	var steps = 0;
 	var oldLevel = $(".preambular").eq(index).data("level");
-	$(".preambular").gt(index).each(
+	$(".preambular").slice(index + 1).each(
 		function ()
 		{
 			if ($(this).data("level") > oldLevel)
@@ -125,9 +134,11 @@ function deleteOperative(index)
 				return false;
 			}
 		}
+	);
+	$(".operative").slice(index, index + howManyToDelete).remove();
+	$(".operative").slice(index).each(function (i) {
+		bindOperative(index + i, $(this));
 	});
-	$(".operative").gt(index - 1).lt(howManyToDelete).remove();
-	$(".operative").gt(index - 1).each(bindOperative);
 }
 
 function getPossibleSponsorsByCommittee(committeeId)
@@ -191,3 +202,7 @@ function removeResolution()
 	$("#operatives").empty();
 	$("#sponsors").empty();
 }
+
+$(document).ready(function() {
+	populateResolution({operatives: [], preambulars: [], committeeId: 0});
+});
