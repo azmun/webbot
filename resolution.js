@@ -55,6 +55,18 @@ function getOperativeToAdd(index, level, keyword, content)
 	return toAdd;
 }
 
+function newPreambular()
+{
+	if (!window.res)
+	{
+		_fuckup("window.res evaluates to false in newPreambular()");
+		return;
+	}
+	var toAdd = getPreambularToAdd(window.res.preambulars.length, '', '');
+	$('#newPreambularClauseButton').before(toAdd);
+	window.res.preambulars.push({keyword: '', content: ''});
+}
+
 function insertPreambularBefore(index)
 {
 	if (!window.res)
@@ -189,7 +201,7 @@ function populateResolution(resolution)
 		var toAdd = getPreambularToAdd(i, resolution.preambulars[i].keyword, resolution.preambulars[i].content);
 		$("#preambulars").append(toAdd);
 	}
-	var newClauseButton = $('<input type="button" value="Insert new preambular clause" />');
+	var newClauseButton = $('<input type="button" id="newPreambularClauseButton" value="Insert new preambular clause" />');
 	newClauseButton.click(newPreambular);
 	$("#preambulars").append(newClauseButton);
 	var steps = 0;
@@ -222,7 +234,7 @@ function populateResolution(resolution)
 		var toAdd = getOperativeToAdd(i, steps, op.keyword, op,content); //keyword may not exist, but it's dgaf
 		$("#operatives").append(toAdd);
 	}
-	$("#operatives").append($('<input type="button" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
+	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
 	resolution.sponsors.sort();
 	$("#sponsorsBox").val(resolution.sponsors.join(', '));
 	$("#sponsorsButton").removeAttr("disabled").click(changeSponsors);
