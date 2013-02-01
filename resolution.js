@@ -18,16 +18,12 @@ function _bind(i, f)
 function bindPreambular(i, elt)
 {
 	elt.find(".insertBeforeButton").click(_bind(i, insertPreambularBefore));
-	elt.find(".keyword").change(_bind(i, changePreambularKeyword));
-	elt.find(".content").change(_bind(i, changePreambularContent));
 	elt.find(".deleteButton").click(_bind(i, deletePreambular));
 }
 
 function bindOperative(i, elt)
 {
 	elt.find('.insertBeforeButton').click(_bind(i, insertOperativeBefore));
-	elt.find('.keyword').change(_bind(i, changeOperativeKeyword)); // may not exist but jquery is dgaf in that case
-	elt.find('.content').change(_bind(i, changeOperativeContent));
 	elt.find('.newSubclauseButton').click(_bind(i, newOperativeIn));
 }
 
