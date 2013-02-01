@@ -61,6 +61,35 @@ function newPreambular()
 	$('#newPreambularClauseButton').before(toAdd);
 }
 
+function newOperativeIn(parentIndex)
+{
+	if (parentIndex < 0) // adding new top-level clause
+	{
+		$('#newOperativeClauseButton').before(getOperativeToAdd($('.operative').length, 0, '', ''));
+	}
+	else
+	{
+		var parentLevel = $('.operative').eq(parentIndex).data('level');
+		var addBeforeIndex = -1;
+		$('.operative').gt(parentIndex).each(function (i)
+		{
+			if ($(this).data('level') <= parentLevel)
+			{
+				addBeforeIndex = i;
+				return false;
+			}
+		}
+		if (addBeforeIndex == -1)
+		{
+			$('#newOperativeClauseButton').before(getOperativeToAdd($('.operative').length, parentLevel + 1, '', ''));
+		}
+		else
+		{
+			$('.operative').eq(addBeforeIndex).before(getOperativeToAdd(addBeforeIndex, parentLevel + 1, '', ''));
+		}
+	}
+}
+
 function insertPreambularBefore(index)
 {
 	var toAdd = getPreambularToAdd(index, '', '');
