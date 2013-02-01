@@ -165,15 +165,29 @@ function populateResolution(resolution)
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
-	resolution.sponsors.sort();
-	$("#sponsorsBox").val(resolution.sponsors.join(', '));
-	$("#sponsorsButton").removeAttr("disabled").click(changeSponsors);
+	var possibleSponsors = getPossibleSponsorsByCommittee(resolution.committeeId);
+	possibleSponsors.sort();
+	if (!possibleSponsors || !(possibleSponsors.length))
+	{
+		_fuckup("No possible sponsors found in committee: " + resolution.committeeId);
+		return;
+	}
+	for (var i = 0; i < possibleSponsors.length; ++i)
+	{
+		var checkbox = $('<input type="checkbox" />').data("country", possibleSponsors[i]);
+		if ($.inArray(possibleSponsors[i], sponsors) != -1)
+		{
+			checkbox.attr("checked", "checked");
+		}
+		$("#sponsors").append(checkbox);
+		$("#sponsors").append(possibleSponsors[i]);
+		$("#sponsors").append("<br />");
+	}
 }
 
 function removeResolution()
 {
 	$("#preambulars").html("<p>No resolution selected.</p>");
 	$("#operatives").empty();
-	$("#sponsorsBox").val('');
-	$("#sponsorsButton").attr("disabled", "disabled");
+	$("#sponsors").empty();
 }
