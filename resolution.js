@@ -15,6 +15,33 @@ function _bind(i, f)
 	}
 }
 
+function performResolutionAction(action)
+{
+	reconstructCurrentResolution();
+	for (var i = 0; i < action.verifications.length; ++i)
+	{
+		if (! _verifications[action.verifications[i]]())
+		{
+			return;
+		}
+	}
+	var param = null;
+	if (action.dialog)
+	{
+		var dialogResult = _actionDialogs[action.dialog]();
+		if (!dialogResult.OK)
+		{
+			return;
+		}
+		param = dialogResult.param;
+	}
+	if (!action.expectToKeep)
+	{
+		forgetResolution(window.currentResolution.resolutionId);
+	}
+	sendActionMessage(window.currentResolution, action.identifier, param);
+}
+
 function bindPreambular(i, elt)
 {
 	elt.find(".insertBeforeButton").off("click").on("click", _bind(i, insertPreambularBefore));
@@ -149,6 +176,7 @@ function getPossibleSponsorsByCommittee(committeeId)
 
 function populateResolution(resolution)
 {
+	window.currentRes = resolution;
 	$("#preambulars").empty();
 	$("#operatives").empty();
 	for (var i = 0; i < resolution.preambulars.length; ++i)
@@ -194,13 +222,23 @@ function populateResolution(resolution)
 		$("#sponsors").append(possibleSponsors[i]);
 		$("#sponsors").append("<br />");
 	}
+	$("#comments").removeAttr("disabled");
+	$("#comments").val(resolution.comments);
+	$("#actions").empty();
+	for (var i = 0; i < resolution.actions.length; ++i)
+	{
+		$("#actions").append($('<input type="button" />').val(resolution.actions[i].displayName).click(_bind(resolutions.actions[i], performResolutionAction)));
+	}
 }
 
 function removeResolution()
 {
+	window.currentResolution = null;
 	$("#preambulars").html("<p>No resolution selected.</p>");
 	$("#operatives").empty();
 	$("#sponsors").empty();
+	$("#comments").val('');
+	$("#comments").attr("disabled", "disabled");
 }
 
 $(document).ready(function() {
