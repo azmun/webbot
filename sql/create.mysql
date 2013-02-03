@@ -19,8 +19,8 @@ CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 
 CREATE TABLE ResolutionSponsors(resolutionId INT NOT NULL,
 	countryId INT NOT NULL,
-	FOREIGN KEY (resolutionId) REFERENCES Resolutions(id),
-	FOREIGN KEY (countryId) REFERENCES Countries(id))
+	FOREIGN KEY (resolutionId) REFERENCES Resolutions(id) ON DELETE CASCADE,
+	FOREIGN KEY (countryId) REFERENCES Countries(id));
 
 CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	email VARCHAR(255) NOT NULL UNIQUE ,
