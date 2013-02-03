@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import rdbms
 import User
 import json
 
@@ -8,65 +9,29 @@ class NoSuchUserError(Exception):
 class NoSuchResolutionError(Exception):
     pass
 
-def _ResolutionModel(db.model):
-    ownerId = db.IntegerProperty()
-    serializedResolutionObject = db.TextProperty()
-    committeeId = db.IntegerProperty()
-    status = db.IntegerProperty()
-    index = db.IntegerProperty()
-    topicIndex = db.IntegerProperty()
-    assigneeId = db.IntegerProperty()
-    originalAssigneeId = db.IntegerProperty()
-    comments = db.TextProperty()
+def _getConnection():
+    return rdbms.connect(instance=_INSTANCE_NAME, databse='webbot')
 
-def _UserModel(db.Model):
-    email = db.EmailProperty()
-    role = db.IntegerProperty()
-    committeeId = db.IntegerProperty()
-    language = db.IntegerProperty()
+def _getCursor():
+    return _getConnection().cursor()
 
 def getWebbotUserByEmail(email):
-    q = _UserModel.all()
-    q.filter('email =', email)
-    result = q.get()
-    if not result:
+    cursor = _getCursor()
+    cursor.execute("SELECT id, role, committeeId, language FROM Users WHERE email=%s", (email,))
+    row = cursor.fetchone()
+    if not row:
         raise NoSuchUserError()
-    ps = result.properties()
-    try:
-        committeeId = ps["committeeId"]
-    except KeyError:
-        committeeId = None
-    try:
-        language = ps["language"]
-    except KeyError:
-        language = None
-    return User.factory(result.key().id(), ps["role"], committeeId, language)
+    (userId, role, committeeId, language) = (row[0], row[1], row[2], row[3])
+    return User.factory(userId, role, committeeId, language)
 
 def delete(resolutionId):
-    k = db.Key.from_path('_ResolutionModel', resolutionId)
-    db.delete(k)
+    cursor = _getCursor()
+    cursor.execute("DELETE FROM Resolutions WHERE id=%s", (resolutionId,))
+
 
 def save(ri):
+    cursor = _getCursor()
     if (ri.resolutionId != None):
-        m = _ResolutionModel(key = db.Key.from_path('_ResolutionModel', ri.resolutionId),
-                ownerId = ri.ownerId,
-                serializedResolutionObject = json.dumps(ri.resolution),
-                committeeId = ri.committeeId,
-                status = ri.status,
-                index = ri.index,
-                topicIndex = ri.topic
-                assigneeId = ri.assigneeId
-                originalAssigneeId = ri.originalAssigneeId
-                comments = ri.comments)
+        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObject=%s, committeeId=%s, status=%s, index=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
     else:
-        m = _ResolutionModel(ownerId = ri.ownerId,
-                serializedResolutionObject = json.dumps(ri.resolution),
-                committeeId = ri.committeeId,
-                status = ri.status,
-                index = ri.index,
-                topicIndex = ri.topic
-                assigneeId = ri.assigneeId
-                originalAssigneeId = ri.originalAssigneeId
-                comments = ri.comments)
-    m.put()
-
+        cursor.execute("INSERT INTO Resolutions (serializedResolutionObject, committeeId, status, index, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
