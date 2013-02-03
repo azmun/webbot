@@ -1,5 +1,5 @@
 class ResolutionInfo:
-    def __init__(self, ownerId, resolutionId, englishResolution, spanishResolution, committeeId, status, index, topic, assigneeId = None):
+    def __init__(self, ownerId, resolutionId, englishResolution, spanishResolution, committeeId, status, index, topic, comments, assigneeId = None):
         self.ownerId = ownerId
         self.resolutionId = resolutionId
         self.resolution = resolution
@@ -8,4 +8,5 @@ class ResolutionInfo:
         self.index = index
         self.topic = topic
         self.assigneeId = assigneeId
+        self.comments = comments
         self.originalAssigneeId = None
