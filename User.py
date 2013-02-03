@@ -44,13 +44,13 @@ class Rapporteur(User):
 
     def getResolutionActions(self, status):
         if status == NEW_DRAFT or status == RETURNED_DRAFT:
-            return [("Save", _saveResolution, None, [], True),
-                    ("Submit", _submitResolution, None, [VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE], False),
-                    ("Delete", _deleteResolution, None, [VERIFY_USER_SURE], False)]
+            return [ActionInfo(actionID = SAVE_RESOLUTION, displayName = "Save", actionFunc = _saveResolution, dialog = None, verifications = [], expectToKeep = True),
+                    ActionInfo(actionID = SUBMIT_RESOLUTION, displayName = "Submit", actionFunc = _submitResolution, dialog = None, verifications = [VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE], expectToKeep = False),
+                    ActionInfo(actionID = DELETE_RESOLUTION, displayName = "Delete", actionFunc = _deleteResolution, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False)]
         if status == PRINTED_DRAFT:
-            return [("Resolution Passed", _resolutionPassed, None, [VERIFY_NO_OUTSTANDING_AMENDMENTS, VERIFY_USER_SURE], False),
-                    ("Resolution Failed", _resolutionFailed, None, [VERIFY_USER_SURE], False)]
-        return None
+            return [ActionInfo(actionID = RESOLUTION_PASSED, displayName = "Resolution Passed", actionFunc = _resolutionPassed, dialog = None, verifications = [VERIFY_NO_OUTSTANDING_AMENDMENTS, VERIFY_USER_SURE], expectToKeep = False),
+                    ActionInfo(actionID = RESOLUTION_FAILED, displayName = "Resolution Failed", actionFunc = _resolutionFailed, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False)]
+        return []
 
 class ResolutionProcessor(User):
     def __init__(self, uId, language):
@@ -70,14 +70,14 @@ class ResolutionProcessor(User):
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
-            return [("Accept", _acceptDraft, None, [VERIFY_USER_SURE], False),
-                    ("Return to rapporteur (reject)", _rejectDraft, None, [VERIFY_USER_SURE_AND_ADDED_COMMENTS], False)]
+            return [ActionInfo(actionID = ACCEPT_DRAFT, displayName = "Accept", actionFunc = _acceptDraft, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False),
+                    ActionInfo(actionID = REJECT_DRAFT, displayName = "Return to rapporteur (reject)", actionFunc = _rejectDraft, dialog = None, verifications = [VERIFY_USER_SURE_AND_ADDED_COMMENTS], expectToKeep = False)]
         if status == ACCEPTED_DRAFT_BEING_TRANSLATED:
-            return [("Translation finished", _translationFinished, None, [VERIFY_RESOLUTIONS_MATCH, VERIFY_USER_SURE], False)]
+            return [ActionInfo(actionID = TRANSLATION_FINISHED, displayName = "Translation finished", actionFunc = _translationFinished, dialog = None, verifications = [VERIFY_RESOLUTIONS_MATCH, VERIFY_USER_SURE], expectToKeep = False)]
         if status == PASSED_RESOLUTION_BEING_PROCESSED:
-            return [("Accept", _acceptFinal, None, [], False),
-                    ("Reject", _rejectFinal, None, [YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS], False)] 
-        return None
+            return [ActionInfo(actionID = ACCEPT_FINAL, displayName = "Accept", actionFunc = _acceptFinal, dialog = None, verifications = [], expectToKeep = False),
+                    ActionInfo(actionID = REJECT_FINAL, displayName = "Reject", actionFunc = _rejectFinal, dialog = None, verifications = [YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS], expectToKeep = False)]
+        return []
 
 
 class RPC(User):
@@ -97,13 +97,13 @@ class RPC(User):
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
-            return [("Assign to Resolution Processor", _assignDraft, PICK_RP, [], False),
-                    ("Accept", _acceptDraft, None, [], False),
-                    ("Reject", _rejectDraft, None, [], False)]
+            return [ActionInfo(actionID = ASSIGN_DRAFT, displayName = "Assign to Resolution Processor", actionFunc = _assignDraft, dialog = PICK_RP, verifications = [], expectToKeep = False),
+                    ActionInfo(actionID = ACCEPT_DRAFT, displayName = "Accept", actionFunc = _acceptDraft, dialog = None, verifications = [], expectToKeep = False),
+                    ActionInfo(actionID = REJECT_DRAFT, displayName = "Reject", actionFunc = _rejectDraft, dialog = None, verifications = [], expectToKeep = False)]
         if status == ACCEPTED_DRAFT_WAITING_FOR_PRINTING:
-            return [("Draft printed", _draftPrinted, None, [], False)]
+            return [ActionInfo(actionID = DRAFT_PRINTED, displayName = "Draft printed", actionFunc = _draftPrinted, dialog = None, verifications = [], expectToKeep = False)]
         if status == ACCEPTED_DRAFT_BEING_TRANSLATED:
-            return [("Assign to Resolution Processor", _assignForTranslation, PICK_TRANSLATOR, [], False)]
+            return [ActionInfo(actionID = ASSIGN_FOR_TRANSLATION, displayName = "Assign to Translator", actionFunc = _assignForTranslation, dialog = PICK_TRANSLATOR, verifications = [], expectToKeep = False)]
         if status == PASSED_RESOLUTION_WAITING_FOR_PRINTING:
-            return [("Final printed", _finalPrinted, None, [], False)]
-        return None
+            return [ActionInfo(actionID = FINAL_PRINTED, displayName = "Final printed", actionFunc = _finalPrinted, dialog = None, verifications = [], expectToKeep = False)]
+        return []

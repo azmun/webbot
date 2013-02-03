@@ -2,6 +2,10 @@ import dblayer
 import config
 import comm
 from enums import *
+import collections
+
+ActionInfo = collections.namedtuple("ActionInfo",
+        ["actionID", "displayName", "actionFunc", "dialog", "verifications", "expectToKeep"])
 
 def _saveResolution(ri, unused):
     dblayer.save(ri)
