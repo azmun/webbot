@@ -1,0 +1,45 @@
+DROP DATABASE IF EXISTS webbot;
+CREATE DATABASE webbot;
+USE webbot;
+CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	serializedResolutionObject TEXT NOT NULL ,
+	committeeId INT NOT NULL,
+	`status` INT NOT NULL,
+	`index` INT NOT NULL,
+	topicIndex INT NOT NULL,
+	assigneeId INT,
+	originalAssigneeId INT,
+	ownerId INT NOT NULL,
+	comments TEXT,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id),
+	FOREIGN KEY (topicIndex) REFERENCES CommitteeTopics(`index`),
+	FOREIGN KEY (assigneeId) REFERENCES Users(id),
+	FOREIGN KEY (originalAssigneeId) REFERENCES Users(id),
+	FOREIGN KEY (ownerId) REFERENCES Users(id));
+
+CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	email VARCHAR(255) NOT NULL UNIQUE ,
+	role INT NOT NULL,
+	committeeId INT NOT NULL,
+	language INT NOT NULL,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id));
+
+CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	language INT NOT NULL,
+	name VARCHAR(255) NOT NULL );
+
+CREATE TABLE Countries(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	englishName VARCHAR(255) NOT NULL ,
+	spanishName VARCHAR(255) NOT NULL );
+
+CREATE TABLE CommitteeCountries(committeeId INT NOT NULL,
+	countryId INT NOT NULL,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id),
+	FOREIGN KEY (countryId) REFERENCES Countries(id));
+
+CREATE TABLE CommitteeTopics(committeeId INT NOT NULL,
+	`index` INT NOT NULL,
+	spanishName VARCHAR(255) ,
+	englishName VARCHAR(255) ,
+	FOREIGN KEY (committeeId) REFERENCES Committees(id),
+	UNIQUE KEY (committeeId, `index`));
