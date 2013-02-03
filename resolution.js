@@ -15,6 +15,37 @@ function _bind(i, f)
 	}
 }
 
+function reconstructCurrentResolution()
+{
+	var cr = window.currentRes;
+	var newRes = {preambulars: [], operatives: [], committeeId: cr.committeeId, resolutionID: cr.resolutionID, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
+	$(".preambular.").each(function ()
+			{
+				var kw = $(this).find(".keyword").val();
+				var ct = $(this).find(".content").val();
+				newRes.preambulars.push({keyword: kw, content: ct});
+			});
+	$(".operative").each(function ()
+			{
+				var kw = $(this).find(".keyword").val();
+				var ct = $(this).find(".content").val();
+				var level = $(this).data("level);
+				if (typeof kw == "undefined")
+				{
+					kw = null;
+				}
+				newRes.operatives.push({keyword: kw, content: ct, level: level});
+			});
+	$(".sponsor").each(function ()
+			{
+				if ($(this).attr("checked"))
+				{
+					newRes.sponsors.push($(this).data('country'));
+				}
+			});
+	window.currentRes = newRes;
+}
+
 function performResolutionAction(action)
 {
 	reconstructCurrentResolution();
@@ -204,6 +235,7 @@ function populateResolution(resolution)
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause" />').click(_bind(-1, newOperativeIn)));
+	var sponsors = resolution.sponsors
 	var possibleSponsors = getPossibleSponsorsByCommittee(resolution.committeeId);
 	possibleSponsors.sort();
 	if (!possibleSponsors || !(possibleSponsors.length))
@@ -213,7 +245,7 @@ function populateResolution(resolution)
 	}
 	for (var i = 0; i < possibleSponsors.length; ++i)
 	{
-		var checkbox = $('<input type="checkbox" />').data("country", possibleSponsors[i]);
+		var checkbox = $('<input class="sponsor" type="checkbox" />').data("country", possibleSponsors[i]);
 		if ($.inArray(possibleSponsors[i], sponsors) != -1)
 		{
 			checkbox.attr("checked", "checked");
