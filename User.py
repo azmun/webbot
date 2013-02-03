@@ -3,8 +3,35 @@ from AmendmentStatuses import *
 from ResolutionModel import *
 from AmendmentModel import *
 from ResolutionActions import *
+from languages import *
 
 #FIXME: Should the RPC just handle finals?
+
+(RAPPORTEUR, RP, RPC) = range(3)
+
+class NoCommitteeError(Exception):
+    pass
+
+class UnknownLanguageError(Exception):
+    pass
+
+class UnknownRoleError(Exception):
+    pass
+
+def factory(uID, role, committeeId = None, language = None):
+    if role == RAPPORTEUR:
+        if committee == None:
+            raise NoCommitteeError()
+        return Rapporteur(uID, committeeId)
+    if role == RP:
+        if not (language in [ENGLISH, SPANISH, BILINGUAL]):
+            raise UnknownLanguageError()
+        return ResolutionProcessor(uID, language)
+    if role == RPC:
+        if not (language in [ENGLISH, SPANISH, BILINGUAL]):
+            raise UnknownLanguageError()
+        return RPC(uID, language)
+    raise UnknownRoleError()
 
 class User:
     def __init__(self, uId):

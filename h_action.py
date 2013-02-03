@@ -22,7 +22,7 @@ class ActionHandler(webapp2.RequestHandler):
         if not gaeUser:
             self.writeRequestErrorResponse("NOT_LOGGED_IN")
             return
-        wbUser = getWebbotUserByEmail(gaeUser.email());
+        wbUser = dblayer.getWebbotUserByEmail(gaeUser.email());
         if not wbUser:
             self.writeRequestErrorResponse("INVALID_USER")
             return
