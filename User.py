@@ -4,6 +4,7 @@ from ResolutionModel import *
 from AmendmentModel import *
 from ResolutionActions import *
 from languages import *
+import Filt
 
 #FIXME: Should the RPC just handle finals?
 
