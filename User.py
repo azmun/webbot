@@ -45,19 +45,16 @@ class Rapporteur(User):
         super(Rapporteur, self).__init__(uId)
         self._committeeId = committeeId
 
-    def getConcernedResolutionsQuery(self):
-        q = ResolutionModel.all()
-        q.filter("committeeId =", self._committeeId)
-        q.filter("status IN", [NEW_DRAFT, RETURNED_DRAFT,
+    def getConcernedResolutionsFilter(self):
+        return [("committeeId", filt.EQ, self._committeeId),
+                ("status". filt.IN,[NEW_DRAFT, RETURNED_DRAFT,
             DRAFT_BEING_PROCESSED, ACCEPTED_DRAFT_WAITING_FOR_PRINTING,
             ACCEPTED_DRAFT_BEING_TRANSLATED, PRINTED_DRAFT,
             PASSED_RESOLUTION_BEING_PROCESSED,
-            PASSED_RESOLUTION_WAITING_FOR_PRINTING, PRINTED_FINAL_RESOLUTION])
-        q.order("status")
-        q.order("topic")
-        q.order("draft")
-        q.order("index")
-        return q
+            PASSED_RESOLUTION_WAITING_FOR_PRINTING, PRINTED_FINAL_RESOLUTION])]
+
+    def getConcernedResolutionsOrder(self):
+        return ["status", "topic", "draft", "index"]
 
     def getConcernedAmendmentsQuery(self):
         q = AmendmentModel.all()
@@ -84,16 +81,13 @@ class ResolutionProcessor(User):
         super(ResolutionProcessor, self).__init__(uId)
         self._language = language
 
-    def getConcernedResolutionsQuery(self):
-        q = ResolutionModel.all()
-        q.filter("assigneeId =", self._uId)
-        q.filter("status IN", [DRAFT_BEING_PROCESSED,
-            ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_BEING_PROCESSED])
-        q.order("status")
-        q.order("topic")
-        q.order("draft")
-        q.order("index")
-        return q
+    def getConcernedResolutionsFilter(self):
+        return [("assigneeId", Filt.EQ, self._uId),
+                ("status", Filt.IN, [DRAFT_BEING_PROCESSED,
+            ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_BEING_PROCESSED])]
+
+    def getConcernedResolutionsOrder(self):
+        return ["status", "topic", "draft", "index"]
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
@@ -111,16 +105,13 @@ class RPC(User):
     def __init__(self, uId, language):
         super(RPC, self).__init__(uId, language)
 
-    def getConcernedResolutionsQuery(self):
-        q = ResolutionModel.all()
-        q.filter("assigneeId =", None)
-        q.filter("status IN", [DRAFT_BEING_PROCESSED, ACCEPTED_DRAFT_WAITING_FOR_PRINTING,
-            ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_WAITING_FOR_PRINTING, SERIOUS_WTF])
-        q.order("status")
-        q.order("topic")
-        q.order("draft")
-        q.order("index")
-        return q
+    def getConcernedResolutionsFilter(self):
+        return [("assigneeId", Filt.EQ, None),
+                ("status", Filt.IN, [DRAFT_BEING_PROCESSED, ACCEPTED_DRAFT_WAITING_FOR_PRINTING,
+            ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_WAITING_FOR_PRINTING, SERIOUS_WTF])]
+
+    def getConcernedResolutionsOrder(self):
+        return ["status", "topic", "draft", "index"]
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
