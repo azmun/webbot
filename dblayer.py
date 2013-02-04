@@ -5,6 +5,8 @@ import json
 import CommitteeInfo
 import Filt
 from languages import *
+import Utils
+from ResolutionInfo import ResolutionInfo
 
 conn = None
 
@@ -15,12 +17,6 @@ class NoSuchResolutionError(Exception):
     pass
 
 class InvalidLanguageError(Exception):
-    pass
-
-class InFilterExpectsValueError(Exception):
-    pass
-
-class EqFilterExpectsValueError(Exception):
     pass
 
 def _getConnection():
@@ -39,9 +35,18 @@ def _getFilterString(tup):
         return field + "(" + string.join(["%s"] * len(val), ", ") +")"
 
 def getUserResolutions(user):
-    whereString = string.join([_getFilterString(t) for t in user.getConcernedResolutionsFilter()], " AND ")
+    filt = user.getConcernedResolutionsFilter()
+    whereString = string.join([_getFilterString(t) for t in filt], " AND ")
     orderString = string.join(user.getConcernedResolutionsOrder(), ", ")
     queryString = "SELECT ownerId, id, serializedResolutionObject, committeeId, `status`, `index`, topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions WHERE " + whereString + " ORDER BY " + orderString
+    params = Utils.shallowFlatten([t[2] for t in filt])
+    cursor = _getCursor()
+    if len(params):
+        cursor.execute(queryString, params)
+    else:
+        cursor.execute(queryString)
+    return [ResolutionInfo(row[0], row[1], json.loads(row[2]), row[3], row[4], row[5], row[6], row[7], row[8], row[9]) for row in cursor.fetchall()]
+    
 
 def getAllCommittees():
     cursor = _getCursor()
