@@ -6,7 +6,6 @@ import json
 import ResolutionAction
 import dblayer
 
-@db.transactional
 def performAction(UId, ri, actionTuple, param):
     oldRI = dblayer.getResolutionInfo(ri.resolutionId)
     if not oldRI.ownerId == UId:
@@ -22,7 +21,7 @@ class ActionHandler(webapp2.RequestHandler):
         if not gaeUser:
             self.writeRequestErrorResponse("NOT_LOGGED_IN")
             return
-        wbUser = dblayer.getWebbotUserByEmail(gaeUser.email());
+        wbUser = dblayer.getWebbotUserByEmail(gaeUser.email())
         if not wbUser:
             self.writeRequestErrorResponse("INVALID_USER")
             return
