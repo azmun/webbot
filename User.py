@@ -56,16 +56,6 @@ class Rapporteur(User):
     def getConcernedResolutionsOrder(self):
         return ["status", "topic", "draft", "index"]
 
-    def getConcernedAmendmentsQuery(self):
-        q = AmendmentModel.all()
-        q.filter("committeeId =", self._committeeId)
-        q.filter("status IN", [NEW_AMENDMENT, RETURNED_AMENDMENT,
-            AMENDMENT_BEING_PROCESSED, ACCEPTED_AMENDMENT_WAITING_FOR_PRINTING,
-            ACCEPTED_AMENDMENT_BEING_TRANSLATED, PRINTED_AMENDMENT])
-        q.order("resolutionId")
-        q.order("index")
-        return q
-
     def getResolutionActions(self, status):
         if status == NEW_DRAFT or status == RETURNED_DRAFT:
             return [ActionInfo(actionID = SAVE_RESOLUTION, displayName = "Save", actionFunc = _saveResolution, dialog = None, verifications = [], expectToKeep = True),
