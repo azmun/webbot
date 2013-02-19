@@ -19,32 +19,48 @@ class UnknownLanguageError(Exception):
 class UnknownRoleError(Exception):
     pass
 
-def factory(uID, role, committeeId = None, language = None):
+def factory(uID, fullName, role, committeeId = None, language = None):
     if role == RAPPORTEUR:
         if committee == None:
             raise NoCommitteeError()
-        return Rapporteur(uID, committeeId)
+        return Rapporteur(uID, fullName, committeeId)
     if role == RP:
         if not (language in [ENGLISH, SPANISH, BILINGUAL]):
             raise UnknownLanguageError()
-        return ResolutionProcessor(uID, language)
+        return ResolutionProcessor(uID, fullName, language)
     if role == RPC:
         if not (language in [ENGLISH, SPANISH, BILINGUAL]):
             raise UnknownLanguageError()
-        return RPC(uID, language)
+        return RPC(uID, fullName, language)
     raise UnknownRoleError()
 
 class User:
-    def __init__(self, uId):
+    def __init__(self, uId, fullName):
         self._uId = uId
+        self._fullName = fullName
 
     def getUId(self):
         return self._uId
 
+    def getFullName(self):
+        return self._fullName
+
+    def canCreateResolutionIn(self):
+        return None
+
+    def getCommittee(self):
+        return None
+
 class Rapporteur(User):
-    def __init__(self, uId, committeeId):
-        super(Rapporteur, self).__init__(uId)
+    def __init__(self, uId, fullName, committeeId):
+        super(Rapporteur, self).__init__(uId, fullName)
         self._committeeId = committeeId
+
+    def getCommittee(self):
+        return committeeId
+
+    def canCreateResolutionIn(self):
+        return committeeId
 
     def getConcernedResolutionsFilter(self):
         return [("committeeId", filt.EQ, self._committeeId),
@@ -68,8 +84,8 @@ class Rapporteur(User):
         return []
 
 class ResolutionProcessor(User):
-    def __init__(self, uId, language):
-        super(ResolutionProcessor, self).__init__(uId)
+    def __init__(self, uId, fullName, language):
+        super(ResolutionProcessor, self).__init__(uId, fullName)
         self._language = language
 
     def getConcernedResolutionsFilter(self):
@@ -93,8 +109,8 @@ class ResolutionProcessor(User):
 
 
 class RPC(User):
-    def __init__(self, uId, language):
-        super(RPC, self).__init__(uId, language)
+    def __init__(self, uId, fullName, language):
+        super(RPC, self).__init__(uId, fullName, language)
 
     def getConcernedResolutionsFilter(self):
         return [("assigneeId", Filt.EQ, None),

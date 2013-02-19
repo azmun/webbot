@@ -7,6 +7,7 @@ import Filt
 from languages import *
 import Utils
 from ResolutionInfo import ResolutionInfo
+from CommitteeInfo import CommitteeInfo
 
 conn = None
 
@@ -14,6 +15,9 @@ class NoSuchUserError(Exception):
     pass
 
 class NoSuchResolutionError(Exception):
+    pass
+
+class NoSuchCommitteeError(Exception):
     pass
 
 class InvalidLanguageError(Exception):
@@ -47,6 +51,15 @@ def getUserResolutions(user):
         cursor.execute(queryString)
     return [ResolutionInfo(row[0], row[1], json.loads(row[2]), row[3], row[4], row[5], row[6], row[7], row[8], row[9]) for row in cursor.fetchall()]
     
+def getEnglishRPs():
+    cursor = _getCursor()
+    cursor.execute("SELECT id, fullName, role. committeeId FROM Users WHERE language=%s", (ENGLISH,))
+    return [Users.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
+
+def getSpanishRPs():
+    cursor = _getCursor()
+    cursor.execute("SELECT id, fullName, role. committeeId FROM Users WHERE language=%s", (SPANISH,))
+    return [Users.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
 
 def getAllCommittees():
     cursor = _getCursor()
@@ -80,16 +93,30 @@ def getAllCommittees():
 
 def getWebbotUserByEmail(email):
     cursor = _getCursor()
-    cursor.execute("SELECT id, role, committeeId, language FROM Users WHERE email=%s", (email,))
+    cursor.execute("SELECT id, fullName, role, committeeId, language FROM Users WHERE email=%s", (email,))
     row = cursor.fetchone()
     if not row:
         raise NoSuchUserError()
-    (userId, role, committeeId, language) = (row[0], row[1], row[2], row[3])
-    return User.factory(userId, role, committeeId, language)
+    (userId, fullName, role, committeeId, language) = (row[0], row[1], row[2], row[3], row[4])
+    return User.factory(userId, fullName, role, committeeId, language)
 
 def delete(resolutionId):
     cursor = _getCursor()
     cursor.execute("DELETE FROM Resolutions WHERE id=%s", (resolutionId,))
+
+def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
+    cursor = _getCursor()
+    cursor.execute("SELECT language, abbreviation, name FROM Committees WHERE id=%s", (committeeId, ))
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchCommitteeError()
+    (language, abbreviation, name) = (row[0], row[1], row[2])
+    return CommitteeInfo(abbreviation, name, language)
+
+def getCommitteeUsedIndices(committeeId):
+    cursor = _getCursor()
+    cursor.execute("SELECT index FROM Resolutions WHERE committeeId=%s ORDER BY index ASC", committeeId)
+    return [row[0] for row in cursor.fetchall()]
 
 
 def save(ri):

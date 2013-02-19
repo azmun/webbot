@@ -5,11 +5,19 @@
 		</script>
         <script type="text/javascript">
             var dg = {{dynamicGlobals}}
+            var ev = {{enumValues}}
             for (x in dg)
             {
                 if (dg.hasOwnProperty(x))
                 {
                     window[x] = dg[x];
+                }
+            }
+            for (x in ev)
+            {
+                if (ev.hasOwnProperty(x))
+                {
+                    window[x] = ev[x];
                 }
             }
         </script>
@@ -36,6 +44,7 @@
 					<textarea id="comments" rows="20" cols="80" disabled />
 				</div>
 				<div id="actions">
+                    {{newIfCan}}
 				</div>
 			</div>
 		</div>

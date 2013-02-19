@@ -23,6 +23,7 @@ CREATE TABLE ResolutionSponsors(resolutionId INT NOT NULL,
 	FOREIGN KEY (countryId) REFERENCES Countries(id));
 
 CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fullName VARCHAR(255) NOT NULL,
 	email VARCHAR(255) NOT NULL UNIQUE ,
 	role INT NOT NULL,
 	committeeId INT NOT NULL,

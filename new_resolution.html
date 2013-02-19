@@ -1,0 +1,17 @@
+<html>
+    <head>
+        <title>New resolution</title>
+    </head>
+    <body>
+        <h1>New Resolution</h1>
+        <form action="/do_new">
+            Topic: <select name="committee">
+                {{committeeOptions}}
+            </select><br />
+            Index: <select name="index">
+                {{indexOptions}}
+            </select><br />
+            <input type="submit" value="Submit" />
+        </form>
+    </body>
+</html>

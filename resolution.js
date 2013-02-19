@@ -14,6 +14,11 @@ function _bind(i, f)
 		f(i);
 	}
 }
+function isInt(value)
+{
+    var er = /^[0-9]+$/;
+    return ( er.test(value) ) ? true : false;
+}
 
 function reconstructCurrentResolution()
 {
@@ -259,8 +264,23 @@ function populateResolution(resolution)
 	$("#actions").empty();
 	for (var i = 0; i < resolution.actions.length; ++i)
 	{
-		$("#actions").append($('<input type="button" />').val(resolution.actions[i].displayName).click(_bind(resolutions.actions[i], performResolutionAction)));
+		$("#actions").append($('<input type="button" />').val(resolution.actions[i].displayName).click(_bind(resolution.actions[i], performResolutionAction)));
 	}
+}
+
+function isDirty()
+{
+    //FIXME also fix newResolution
+    return false;
+}
+
+function newResolution(committee)
+{
+    if (isDirty())
+    {
+        //FIXME
+    }
+    window.location.replace("/new_resolution")
 }
 
 function removeResolution()
@@ -273,6 +293,65 @@ function removeResolution()
 	$("#comments").attr("disabled", "disabled");
 }
 
+function buildResolutionsTree(resolutions, order)
+{
+    var first;
+    var second;
+    var topLevel = [];
+    var firstLevel;
+    var secondLevel;
+    for (var i = 0; i < resolutions.length; ++i)
+    {
+        var res = resolutions[i];
+        var firstChanged = false;
+        var secondChanged = false;
+        if (order.length > 0)
+        {
+            newFirst = res[order[0]];
+            firstChanged = newFirst != first;
+            first = newFirst;
+            if (order.length > 1)
+            {
+                newSecond = res[order[1]];
+                secondChanged = newSecond != second;
+                second = newSecond;
+            }
+        }
+        if (firstChanged)
+        {
+            firstLevel = {"title": res[order[0]], "children": [], "isFolder": true};
+            topLevel.push(firstLevel);
+            secondChanged = order.length > 1;
+        }
+        if (secondChanged)
+        {
+            secondLevel = {"title": res[order[1]], "children": [], "isFolder": true};
+            firstLevel.children.push(secondLevel);
+        }
+        var whereToAdd;
+        if (order.length > 1)
+        {
+            whereToAdd = secondLevel.children;
+        }
+        else if (order.length == 1)
+        {
+            whereToAdd = firstLevel.children;
+        }
+        else
+        {
+            whereToAdd = topLevel;
+        }
+        whereToAdd.push({"title": getResolutionTag(res), "resolution": res});
+    }
+}
+
 $(document).ready(function() {
-	populateResolution({operatives: [], preambulars: [], committeeId: 0});
+    var tree = buildResolutionsTree(resolutions, sortOrder);
+    $("#menu").dynatree({
+        children: tree,
+        onActivate: function(node) {
+            populateResolution(node.data.resolution);
+        }
+    });
 });
+

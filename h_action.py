@@ -4,6 +4,7 @@ import webapp2
 import json
 
 import ResolutionAction
+from ValidUserRequestHandler import ValidUserJSONHandler
 import dblayer
 
 def performAction(UId, ri, actionTuple, param):
@@ -15,16 +16,8 @@ def performAction(UId, ri, actionTuple, param):
     except:
         return None, "UNKNOWN_ERROR"
     return json.dumps({"Error": None, "Success": True}), None
-class ActionHandler(webapp2.RequestHandler):
-    def post(self):
-        gaeUser = users.get_current_user()
-        if not gaeUser:
-            self.writeRequestErrorResponse("NOT_LOGGED_IN")
-            return
-        wbUser = dblayer.getWebbotUserByEmail(gaeUser.email())
-        if not wbUser:
-            self.writeRequestErrorResponse("INVALID_USER")
-            return
+class ActionHandler(ValidUserJSONHandler):
+    def postWithUser(self):
         try:
             resolutionClientObject = json.loads(self.request.body)
         except ValueError:
@@ -35,7 +28,7 @@ class ActionHandler(webapp2.RequestHandler):
         except:
             self.writeRequestErrorResponse("CANT_CONVERT_RESOLUTION")
             return
-        actions = wbUser.getResolutionActions(ri.status)
+        actions = self.wbUser.getResolutionActions(ri.status)
         try:
             action = next(x for x in actions if x.actionID == resolutionClientObject["action"])
         except (ValueError, KeyError):
@@ -52,7 +45,7 @@ class ActionHandler(webapp2.RequestHandler):
             actionParam = resolutionClientObject["param"]
         except KeyError:
             actionParam = None
-        result, err = performAction(wbUser.UId, ri, action, param)
+        result, err = performAction(self.wbUser.UId, ri, action, param)
         if (err):
             self.writeRequestErrorResponse(err)
             return
