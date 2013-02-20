@@ -7,6 +7,7 @@ import Filt
 from languages import *
 import Utils
 from ResolutionInfo import ResolutionInfo
+from ResolutionStatuses import *
 from CommitteeInfo import CommitteeInfo
 
 conn = None
@@ -113,9 +114,14 @@ def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
     (language, abbreviation, name) = (row[0], row[1], row[2])
     return CommitteeInfo(abbreviation, name, language)
 
-def getCommitteeUsedIndices(committeeId):
+def createNewResolution(committeeId, index, topic, ownerId):
     cursor = _getCursor()
-    cursor.execute("SELECT index FROM Resolutions WHERE committeeId=%s ORDER BY index ASC", committeeId)
+    cursor.execute("INSERT INTO Resolutions (serializedResolutionObject, committeeId, `status`, `index`, topicIndex, ownerId) VALUES (%s, %s, %s, %s, %s, %s)", json.dumps(Resolution()), committeeId, NEW_DRAFT, index, topic, ownerId)
+
+
+def getCommitteeUsedIndices(committeeId, topic):
+    cursor = _getCursor()
+    cursor.execute("SELECT index FROM Resolutions WHERE committeeId=%s AND topic=%s ORDER BY index ASC", committeeId, topic)
     return [row[0] for row in cursor.fetchall()]
 
 

@@ -1,15 +1,26 @@
 <html>
     <head>
         <title>New resolution</title>
+        <script type="text/javascript">
+            {{indexOptions}}
+        </script>
+        <script type="text/javascript">
+            $("#topic").select(function() {
+                    var selectedTopic = $("#topic:selected").attr("value");
+                    $("#index").html(topicOptions[selectedTopic]);
+                    });
+        </script>
     </head>
     <body>
         <h1>New Resolution</h1>
         <form action="/do_new">
-            Topic: <select name="committee">
+            Committee: <select name="committee">
                 {{committeeOptions}}
             </select><br />
+            Topic: <select name="topic">
+                {{topicOptions}}
             Index: <select name="index">
-                {{indexOptions}}
+                {{firstTopicIndexOptions}}
             </select><br />
             <input type="submit" value="Submit" />
         </form>
