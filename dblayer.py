@@ -12,6 +12,8 @@ from CommitteeInfo import CommitteeInfo
 
 conn = None
 
+_INSTANCE_NAME = "arizonamun.org:webbot:data"
+
 class NoSuchUserError(Exception):
     pass
 
@@ -27,7 +29,7 @@ class InvalidLanguageError(Exception):
 def _getConnection():
     if conn:
         return conn
-    return rdbms.connect(instance=_INSTANCE_NAME, databse='webbot')
+    return rdbms.connect(instance=_INSTANCE_NAME, database='webbot')
 
 def _getCursor():
     return _getConnection().cursor()
