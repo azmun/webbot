@@ -1,5 +1,6 @@
 from ValidUserRequestHandler import ValidUserRequestHandler
 import dblayer
+import logging
 
 class DoNewHandler(ValidUserRequestHandler):
     def writeCommitteeFail(self):
@@ -27,8 +28,9 @@ class DoNewHandler(ValidUserRequestHandler):
             self.writeError('This user cannot create a resolution in this committee.')
             return
         try:
-            dblayer.createNewResolution(committeeId, index, topic, wbUser.uID)
-        except:
+            dblayer.createNewResolution(committeeId, index, topic, self.wbUser.getUId())
+        except Exception as e:
+            logging.error(e.__repr__())
             self.writeError("Unknown database error.")
             return
         self.redirect('/')

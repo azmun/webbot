@@ -4,8 +4,8 @@
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js">
 		</script>
         <script type="text/javascript">
-            var dg = {{dynamicGlobals}}
-            var ev = {{enumValues}}
+            var dg = {{dynamicGlobals|safe}}
+            var ev = {{enumValues|safe}}
             for (x in dg)
             {
                 if (dg.hasOwnProperty(x))
@@ -21,7 +21,7 @@
                 }
             }
         </script>
-		<script type="text/javascript" src="resolution.js">
+		<script type="text/javascript" src="js/resolution.js">
 		</script>
 	</head>
 	<body>
@@ -41,10 +41,11 @@
 				</div>
 				<div>
 					<p>Comments:</p>
-					<textarea id="comments" rows="20" cols="80" disabled />
+                    <textarea id="comments" rows="20" cols="80" disabled>
+                    </textarea>
 				</div>
 				<div id="actions">
-                    {{newIfCan}}
+                    {{newIfCan|safe}}
 				</div>
 			</div>
 		</div>

@@ -1,14 +1,14 @@
 from google.appengine.ext import db
 from google.appengine.api import rdbms
 import User
+import logging
 import json
-import CommitteeInfo
+import string
 import Filt
 from languages import *
 import Utils
 from ResolutionInfo import ResolutionInfo
 from ResolutionStatuses import *
-from CommitteeInfo import CommitteeInfo
 
 conn = None
 
@@ -39,7 +39,7 @@ def _getFilterString(tup):
     if op == Filt.EQ:
         return field + "=%s"
     if op == Filt.IN:
-        return field + "(" + string.join(["%s"] * len(val), ", ") +")"
+        return "`%s` IN (" % field + string.join(["%s"] * len(val), ", ") +")"
 
 def getRPC_ID(lang):
     cursor = _getCursor()
@@ -78,11 +78,12 @@ def getResolutionInfo(resolutionId):
 def getUserResolutions(user):
     filt = user.getConcernedResolutionsFilter()
     whereString = string.join([_getFilterString(t) for t in filt], " AND ")
-    orderString = string.join(user.getConcernedResolutionsOrder(), ", ")
+    orderString = string.join(["`%s`" % s for s in user.getConcernedResolutionsOrder()], ", ")
     queryString = "SELECT ownerId, id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions WHERE " + whereString + " ORDER BY " + orderString
     params = Utils.shallowFlatten([t[2] for t in filt])
     cursor = _getCursor()
     if len(params):
+        logging.info("In getUserResolutions; executing cursor with queryString: %s" % queryString)
         cursor.execute(queryString, params)
     else:
         cursor.execute(queryString)
@@ -90,13 +91,13 @@ def getUserResolutions(user):
     
 def getEnglishRPs():
     cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role. committeeId FROM Users WHERE language=%s", (ENGLISH,))
-    return [Users.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
+    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s", (ENGLISH,))
+    return [User.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
 
 def getSpanishRPs():
     cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role. committeeId FROM Users WHERE language=%s", (SPANISH,))
-    return [Users.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
+    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s", (SPANISH,))
+    return [User.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
 
 def getAllCommittees():
     cursor = _getCursor()
@@ -107,23 +108,25 @@ def getAllCommittees():
         if not abbreviation in ret:
             if not language in (ENGLISH, SPANISH, BILINGUAL):
                 raise InvalidLanguageError()
-            ret[abbreviation] = CommitteeInfo.CommitteeInfo(abbreviation, name, language)
+            ret[abbreviation] = {"abbreviation": abbreviation, "name": name, "language": language, "countries": [], "topics": []}
+        ci = ret[abbreviation]
         if language == ENGLISH and englishName:
-            ret.countries.append(englishName)
+            ci["countries"].append(englishName)
         elif language == SPANISH and spanishName:
-            ret.countries.append(spanishName)
+            ci["countries"].append(spanishName)
         elif language == BILINGUAL and englishName and spanishName:
-            ret.countries.append((englishName, spanishName))
+            ci["countries"].append((englishName, spanishName))
     cursor.execute("SELECT abbreviation, englishName, spanishName FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     for row in cursor.fetchall():
         (abbreviation, englishName, spanishName) = (row[0], row[1], row[2])
-        lang = ret[abbreviation].language
+        ci = ret[abbreviation]
+        lang = ci["language"]
         if lang == ENGLISH and englishName:
-            ret.topics.append(englishName)
+            ci["topics"].append(englishName)
         elif lang == SPANISH and spanishName:
-            ret.topics.append(spanishName)
+            ci["topics"].append(spanishName)
         elif lang == BILINGUAL and englishName and spanishName:
-            ret.topics.append(englishName, spanishName)
+            ci["topics"].append(englishName, spanishName)
     return ret
 
 
@@ -148,7 +151,13 @@ def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
     if not row:
         raise NoSuchCommitteeError()
     (language, abbreviation, name) = (row[0], row[1], row[2])
-    return CommitteeInfo(abbreviation, name, language)
+    return {"language": language, "abbreviation": abbreviation, "name": name}
+
+def getCommitteeTopics(committeeId):
+    logging.info("Getting committee topics with id=%s" % committeeId)
+    cursor = _getCursor()
+    cursor.execute("SELECT englishName, spanishName FROM CommitteeTopics WHERE committeeId=%s ORDER BY `index`", committeeId)
+    return [(row[0], row[1]) for row in cursor.fetchall()]
 
 def createNewResolution(committeeId, index, topic, ownerId, language):
     cursor = _getCursor()
@@ -163,12 +172,12 @@ def createNewResolution(committeeId, index, topic, ownerId, language):
 
 def getCommitteeUsedIndices(committeeId, topic):
     cursor = _getCursor()
-    cursor.execute("SELECT index FROM Resolutions WHERE committeeId=%s AND topic=%s ORDER BY index ASC", committeeId, topic)
+    cursor.execute("SELECT `index` FROM Resolutions WHERE committeeId=%s AND topicIndex=%s ORDER BY `index` ASC", (committeeId, topic))
     return [row[0] for row in cursor.fetchall()]
 
 def save(ri):
     cursor = _getCursor()
     if (ri.resolutionId != None):
-        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, committeeId=%s, status=%s, index=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s", (ri.ownerId, json.dumps(ri.englishResolution), json.dumps(ri.spanishResolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
+        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, committeeId=%s, status=%s, `index`=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s", (ri.ownerId, json.dumps(ri.englishResolution), json.dumps(ri.spanishResolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
     else:
-        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, status, index, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
+        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, status, `index`, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))

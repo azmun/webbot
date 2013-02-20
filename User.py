@@ -19,7 +19,7 @@ class UnknownRoleError(Exception):
 
 def factory(uID, fullName, role, committeeId = None, language = None):
     if role == RAPPORTEUR:
-        if committee == None:
+        if committeeId == None:
             raise NoCommitteeError()
         return Rapporteur(uID, fullName, committeeId)
     if role == RP:
@@ -51,25 +51,25 @@ class User:
 
 class Rapporteur(User):
     def __init__(self, uId, fullName, committeeId):
-        super(Rapporteur, self).__init__(uId, fullName)
+        User.__init__(self, uId, fullName)
         self._committeeId = committeeId
 
     def getCommittee(self):
-        return committeeId
+        return self._committeeId
 
     def canCreateResolutionIn(self):
-        return committeeId
+        return self._committeeId
 
     def getConcernedResolutionsFilter(self):
-        return [("committeeId", filt.EQ, self._committeeId),
-                ("status". filt.IN,[NEW_DRAFT, RETURNED_DRAFT,
+        return [("committeeId", Filt.EQ, self._committeeId),
+                ("status", Filt.IN,[NEW_DRAFT, RETURNED_DRAFT,
             DRAFT_BEING_PROCESSED, ACCEPTED_DRAFT_WAITING_FOR_PRINTING,
             ACCEPTED_DRAFT_BEING_TRANSLATED, PRINTED_DRAFT,
             PASSED_RESOLUTION_BEING_PROCESSED,
             PASSED_RESOLUTION_WAITING_FOR_PRINTING, PRINTED_FINAL_RESOLUTION])]
 
     def getConcernedResolutionsOrder(self):
-        return ["status", "topic", "draft", "index"]
+        return ["status", "topicIndex", "index"]
 
     def getResolutionActions(self, status):
         if status == NEW_DRAFT or status == RETURNED_DRAFT:
@@ -92,7 +92,7 @@ class ResolutionProcessor(User):
             ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_BEING_PROCESSED])]
 
     def getConcernedResolutionsOrder(self):
-        return ["status", "topic", "draft", "index"]
+        return ["status", "topicIndex", "index"]
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
@@ -116,7 +116,7 @@ class RPC(User):
             ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_WAITING_FOR_PRINTING, SERIOUS_WTF])]
 
     def getConcernedResolutionsOrder(self):
-        return ["status", "topic", "draft", "index"]
+        return ["status", "topicIndex", "index"]
 
     def getResolutionActions(self, status):
         if status == DRAFT_BEING_PROCESSED:
