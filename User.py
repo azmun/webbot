@@ -1,7 +1,5 @@
 from ResolutionStatuses import *
 from AmendmentStatuses import *
-from ResolutionModel import *
-from AmendmentModel import *
 from ResolutionActions import *
 from languages import *
 import Filt

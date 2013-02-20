@@ -28,7 +28,7 @@ CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
 	email VARCHAR(255) NOT NULL UNIQUE ,
 	role INT NOT NULL,
-	committeeId INT NOT NULL,
+	committeeId INT,
 	language INT NOT NULL,
 	FOREIGN KEY (committeeId) REFERENCES Committees(id));
 
