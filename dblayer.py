@@ -39,6 +39,30 @@ def _getFilterString(tup):
     if op == Filt.IN:
         return field + "(" + string.join(["%s"] * len(val), ", ") +")"
 
+def getRPC_ID(lang):
+    cursor = _getCursor()
+    cursor.execute("SELECT id FROM Users WHERE role=%s AND language=%s", (User.RPC, lang))
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchUserError()
+    return row[0]
+
+def getCommitteeRapporteurID(committeeId):
+    cursor = _getCursor()
+    cursor.execute("SELECT id FROM Users WHERE committeeId=%s AND role=%s", (committeeId, User.RAPPORTEUR))
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchUserError()
+    return row[0]
+
+def getCommitteeLanguage(committeeId):
+    cursor = _getCursor()
+    cursor.execute("SELECT language FROM Committees WHERE committeeId=%s", committeeId)
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchCommitteeError()
+    return row[0]
+
 def getResolutionInfo(resolutionId):
     cursor = _getCursor()
     cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, comments, originalAssigneeId FROM Resolutions WHERE id=%s", resolutionId)
