@@ -1,6 +1,5 @@
 import dblayer
 import comm
-from enums import *
 import collections
 
 ActionInfo = collections.namedtuple("ActionInfo",
@@ -88,7 +87,7 @@ def _draftPrinted(ri, unused):
     dblayer.save(ri)
     comm.setMessage(ri, user, "Draft printed!", "The draft resolution {} has been printed; go pick it up!".format(ri.resolutionId))
     comm.push(ri, user)
-user
+
 def _assignForTranslation(ri, translatorParam):
     ri.assigneeId = translatorParam
     ri.ownerId = translatorParam

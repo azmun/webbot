@@ -2,7 +2,7 @@ from google.appengine.api import users
 from google.appengine.ext import db
 import webapp2
 import json
-import ResolutionAction
+import ResolutionActions
 import ResolutionInfo
 from ValidUserRequestHandler import ValidUserJSONHandler
 import dblayer
@@ -24,7 +24,7 @@ class ActionHandler(ValidUserJSONHandler):
         if 'spanish' in rco:
             ri.spanishResolution = rco['spanish']
         if 'english' in rco:
-            ri.englishR/solution = rco['english']
+            ri.englishResolution = rco['english']
         ri.comments = rco['comments']
     def postWithUser(self):
         try:

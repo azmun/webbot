@@ -1,8 +1,8 @@
 import webapp2
-from webapp2 import template
+from google.appengine.ext.webapp import template
 import dblayer
 import json
-from ActionVerification import ActionVerifications
+from ActionVerifications import ActionVerifications
 from ActionDialogs import ActionDialogs
 from ValidUserRequestHandler import ValidUserRequestHandler
 import Enums
@@ -31,11 +31,11 @@ class IndexHandler(ValidUserRequestHandler):
         enumsJson = json.dumps(Enums.All)
         nic = ''
         committee = self.wbUser.canCreateResolutionIn()
-        if committee != None
+        if committee != None:
             nic = _getNewButton(committee)
         templateValues = {
             'dynamicGlobals': gvJson,
-            'enumValues': enumsJson
+            'enumValues': enumsJson,
             'newIfCan': nic
         }
         path = os.path.join(os.path.dirname(__file__), 'resolution.html')

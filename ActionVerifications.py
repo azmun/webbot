@@ -30,7 +30,7 @@ ActionVerifications = [ActionVerification(VERIFY_FULL_RESOLUTION,
         r"""function ()
             {
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
-            }"""
+            }""",
         lambda ri: True),
     #FIXME: Make this legit once we implement amendments.
     ActionVerification(VERIFY_NO_OUTSTANDING_AMENDMENTS, "function() { return true; }", lambda ri: True),
@@ -44,9 +44,9 @@ ActionVerifications = [ActionVerification(VERIFY_FULL_RESOLUTION,
               }
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
             }""",
-        lambda ri: return bool(ri.comments)),
+        lambda ri: bool(ri.comments)),
     #FIXME: Make this legit once we ipmlement translation
-    ActionVerification(VERIFY_RESOLUTIONS_MATCH, "function () { return true; }", lambda ri: return True),
+    ActionVerification(VERIFY_RESOLUTIONS_MATCH, "function () { return true; }", lambda ri: True),
     ActionVerification(YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
         r"""function ()
             {

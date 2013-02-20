@@ -1,4 +1,5 @@
 import webapp2
+from google.appengine.api import users
 
 class ValidUserRequestHandler(webapp2.RequestHandler):
     def writeInvalidUser(self):
