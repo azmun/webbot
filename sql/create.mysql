@@ -2,7 +2,8 @@ DROP DATABASE IF EXISTS webbot;
 CREATE DATABASE webbot;
 USE webbot;
 CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	serializedResolutionObject TEXT NOT NULL ,
+	serializedResolutionObjectEnglish TEXT,
+    serializedResolutionObjectSpanish TEXT,
 	committeeId INT NOT NULL,
 	`status` INT NOT NULL,
 	`index` INT NOT NULL,

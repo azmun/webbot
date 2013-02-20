@@ -51,6 +51,30 @@ function reconstructCurrentResolution()
 	window.currentRes = newRes;
 }
 
+function sendActionMessage(res, action, param)
+{
+    var toSend = {};
+    if (lang == ENGLISH)
+    {
+        toSend["english"] = res;
+    }
+    //FIXME: BILINGUAL
+    else
+    {
+        toSend["spanish"] = res;
+    }
+    toSend["id"] = res.resolutionID;
+    toSend["comments"] = res.comments;
+    toSend["action"] = action;
+    toSend["param"] = param;
+    $.post('/action', toSend, function(data) {
+       if (! data.Success) {
+           alert("An error has occurred! Please tell conference services.\nError: " + data.Error);
+       }
+    }, 'json');
+
+}
+
 function performResolutionAction(action)
 {
 	reconstructCurrentResolution();

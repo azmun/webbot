@@ -39,18 +39,28 @@ def _getFilterString(tup):
     if op == Filt.IN:
         return field + "(" + string.join(["%s"] * len(val), ", ") +")"
 
+def getResolutionInfo(resolutionId):
+    cursor = _getCursor()
+    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, comments, originalAssigneeId FROM Resolutions WHERE id=%s", resolutionId)
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchResolutionError()
+    ret = ResolutionInfo(row[0], json.loads(row[1]), json.loads(row[2]), row[3], row[4], row[5], row[6], row[7], row[8], row[9])
+    ret.originalAssigneeId = row[10]
+    return ret
+
 def getUserResolutions(user):
     filt = user.getConcernedResolutionsFilter()
     whereString = string.join([_getFilterString(t) for t in filt], " AND ")
     orderString = string.join(user.getConcernedResolutionsOrder(), ", ")
-    queryString = "SELECT ownerId, id, serializedResolutionObject, committeeId, `status`, `index`, topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions WHERE " + whereString + " ORDER BY " + orderString
+    queryString = "SELECT ownerId, id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions WHERE " + whereString + " ORDER BY " + orderString
     params = Utils.shallowFlatten([t[2] for t in filt])
     cursor = _getCursor()
     if len(params):
         cursor.execute(queryString, params)
     else:
         cursor.execute(queryString)
-    return [ResolutionInfo(row[0], row[1], json.loads(row[2]), row[3], row[4], row[5], row[6], row[7], row[8], row[9]) for row in cursor.fetchall()]
+    return [ResolutionInfo(row[0], row[1], json.loads(row[2]), json.loads(row[3]), row[4], row[5], row[6], row[7], row[8], row[9], row[10]) for row in cursor.fetchall()]
     
 def getEnglishRPs():
     cursor = _getCursor()
@@ -114,9 +124,15 @@ def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
     (language, abbreviation, name) = (row[0], row[1], row[2])
     return CommitteeInfo(abbreviation, name, language)
 
-def createNewResolution(committeeId, index, topic, ownerId):
+def createNewResolution(committeeId, index, topic, ownerId, language):
     cursor = _getCursor()
-    cursor.execute("INSERT INTO Resolutions (serializedResolutionObject, committeeId, `status`, `index`, topicIndex, ownerId) VALUES (%s, %s, %s, %s, %s, %s)", json.dumps(Resolution()), committeeId, NEW_DRAFT, index, topic, ownerId)
+    englishRes = None
+    spanishRes = None
+    if language in [ENGLISH, BILINGUAL]:
+        englishResString = json.dumps(Resolution())
+    if language in [SPANISH, BILINGUAL]:
+        spanishResString = json.dumps(Resolution())
+    cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, ownerId) VALUES (%s, %s, %s, %s, %s, %s)", englishResString, spanishResString, committeeId, NEW_DRAFT, index, topic, ownerId)
 
 
 def getCommitteeUsedIndices(committeeId, topic):
@@ -124,10 +140,9 @@ def getCommitteeUsedIndices(committeeId, topic):
     cursor.execute("SELECT index FROM Resolutions WHERE committeeId=%s AND topic=%s ORDER BY index ASC", committeeId, topic)
     return [row[0] for row in cursor.fetchall()]
 
-
 def save(ri):
     cursor = _getCursor()
     if (ri.resolutionId != None):
-        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObject=%s, committeeId=%s, status=%s, index=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
+        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, committeeId=%s, status=%s, index=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s", (ri.ownerId, json.dumps(ri.englishResolution), json.dumps(ri.spanishResolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
     else:
-        cursor.execute("INSERT INTO Resolutions (serializedResolutionObject, committeeId, status, index, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))
+        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, status, index, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri.ownerId, json.dumps(ri.resolution), ri.committeeId, ri.status, ri.index, ri.topic, ri.assigneeId, ri.originalAssigneeId, ri.comments))

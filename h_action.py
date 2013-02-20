@@ -2,8 +2,8 @@ from google.appengine.api import users
 from google.appengine.ext import db
 import webapp2
 import json
-
 import ResolutionAction
+import ResolutionInfo
 from ValidUserRequestHandler import ValidUserJSONHandler
 import dblayer
 
@@ -16,7 +16,16 @@ def performAction(UId, ri, actionTuple, param):
     except:
         return None, "UNKNOWN_ERROR"
     return json.dumps({"Error": None, "Success": True}), None
+
+
 class ActionHandler(ValidUserJSONHandler):
+    def convertResolutionObject(self, rco): #why is this necessary
+        ri = dblayer.getResolutionInfo(rco['id'])
+        if 'spanish' in rco:
+            ri.spanishResolution = rco['spanish']
+        if 'english' in rco:
+            ri.englishR/solution = rco['english']
+        ri.comments = rco['comments']
     def postWithUser(self):
         try:
             resolutionClientObject = json.loads(self.request.body)
@@ -24,7 +33,7 @@ class ActionHandler(ValidUserJSONHandler):
             self.writeRequestErrorResponse("GARBAGE_JSON")
             return
         try:
-            ri = convertResolutionObject(resolutionClientObject)
+            ri = self.convertResolutionObject(resolutionClientObject)
         except:
             self.writeRequestErrorResponse("CANT_CONVERT_RESOLUTION")
             return
