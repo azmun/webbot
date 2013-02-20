@@ -30,7 +30,7 @@ def _resolutionPassed(ri, unused):
     else:
         ri.ownerId = ri.assigneeId
     dblayer.save(ri)
-    comm.push(ri.ownerId)
+    comm.push(ri, ri.ownerId)
 
 def _resolutionFailed(ri, unused):
     ri.status = THE_DUSTBIN_OF_HISTORY
