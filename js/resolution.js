@@ -388,7 +388,7 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
         for (var j = c; j < howManyLevels; ++j)
         {
             // make a new item based on order[j] and add it to levelParents[j]
-            var item = {"title": res[order[j]], "children": [], "isFolder": true};
+            var item = {"title": order[j] + ": " + res[order[j]], "children": [], "isFolder": true};
             levelParents[j].push(item);
             // set levelParents[j+1] to that item
             levelParents[j + 1] = item.children;

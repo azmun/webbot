@@ -84,7 +84,7 @@ class Rapporteur(User):
 
 class ResolutionProcessor(User):
     def __init__(self, uId, fullName, language):
-        super(ResolutionProcessor, self).__init__(uId, fullName)
+        User.__init__(self, uId, fullName)
         self._language = language
 
     def getConcernedResolutionsFilter(self):
@@ -109,7 +109,7 @@ class ResolutionProcessor(User):
 
 class RPC(User):
     def __init__(self, uId, fullName, language):
-        super(RPC, self).__init__(uId, fullName, language)
+        User.__init__(self, uId, fullName)
 
     def getConcernedResolutionsFilter(self):
         return [("assigneeId", Filt.EQ, None),
