@@ -5,14 +5,16 @@ import json
 from ActionVerifications import ActionVerifications
 from ActionDialogs import ActionDialogs
 from ValidUserRequestHandler import ValidUserRequestHandler
+from ResolutionActions import getSerializableVersion
 import Enums
 import os
 
 def _getGeneratedValues(user):
     ret = {}
     ret["resolutions"] = dblayer.getUserResolutions(user)
+    ret["resolutionActions"] = {}
     for res in ret["resolutions"]:
-        res.actions = user.getResolutionActions(res.status)
+        ret["resolutionActions"][res.resolutionId] = [getSerializableVersion(ra) for ra in user.getResolutionActions(res.status)]
     ret["committees"] = dblayer.getAllCommittees()
     ret["sortOrder"] = user.getConcernedResolutionsOrder()
     ret["englishRPs"] = [u.__dict__ for u in dblayer.getEnglishRPs()]

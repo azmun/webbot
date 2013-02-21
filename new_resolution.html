@@ -4,28 +4,31 @@
 		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js">
 		</script>
         <script type="text/javascript">
-            {{indexOptions|safe}}
+            indexOptions = {{indexOptions|safe}}
         </script>
         <script type="text/javascript">
-            $("#topic").select(function() {
-                    var selectedTopic = $("#topic:selected").attr("value");
-                    $("#index").html(topicOptions[selectedTopic]);
+            $(document).ready(function () {
+                    $("#topic").change(function() {
+                            var selectedTopic = $("#topic option:selected").attr("value");
+                            $("#index").html(indexOptions[selectedTopic]);
+                        });
                     });
         </script>
     </head>
     <body>
         <h1>New Resolution</h1>
         <form action="/do_new" method="post">
-            Committee: <select name="committee">
+            Committee: <select name="committee" id="committee">
                 {{committeeOptions|safe}}
             </select><br />
-            Topic: <select name="topic">
+            Topic: <select name="topic" id="topic">
                 {{topicOptions|safe}}
             </select><br />
-            Index: <select name="index">
+            Index: <select name="index" id="index">
                 {{firstTopicIndexOptions|safe}}
             </select><br />
             <input type="submit" value="Submit" />
+
         </form>
     </body>
 </html>
