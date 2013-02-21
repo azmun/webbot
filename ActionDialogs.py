@@ -1,11 +1,7 @@
-import collections
-
 (PICK_RP, PICK_TRANSLATOR) = range(2)
 
-ActionDialog = collections.namedtuple("ActionDialog", ["dialogID", "js"])
-
-ActionDialogs = [ActionDialog(PICK_RP,
-    r"""function(res)
+ActionDialogs = [{"dialogID": PICK_RP,
+        "js": r"""function(res)
         {
             var answer;
             promptStr = "";
@@ -35,10 +31,10 @@ ActionDialogs = [ActionDialog(PICK_RP,
                     }
                 }
             }
-        }"""), ActionDialog(PICK_TRANSLATOR,
-        r"""
+        }"""}, {"dialogID": PICK_TRANSLATOR,
+            "js": r"""
         function (res)
         {
             return;
-        }""")]
+        }"""}]
 

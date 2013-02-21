@@ -1,11 +1,7 @@
-import collections
+(VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE, VERIFY_USER_SURE_AND_ADDED_COMMENTS, VERIFY_RESOLUTIONS_MATCH, YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS) = range(5)
 
-(VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE, VERIFY_NO_OUTSTANDING_AMENDMENTS, VERIFY_USER_SURE_AND_ADDED_COMMENTS, VERIFY_RESOLUTIONS_MATCH, YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS) = range(6)
-
-ActionVerification = collections.namedtuple("ActionVerification", ["verificationID", "js", "python"])
-
-ActionVerifications = [ActionVerification(VERIFY_FULL_RESOLUTION,
-        r"""function ()
+ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
+    "js": r"""function ()
             {
               var cr = window.currentRes;
               if (cr.preambulars.length == 0)
@@ -25,17 +21,15 @@ ActionVerifications = [ActionVerification(VERIFY_FULL_RESOLUTION,
               }
               return true;
             }""",
-        lambda ri: len(ri.res.preambulars) > 0 and len(ri.res.operatives) > 0 and len(ri.res.sponsors) > 0),
-    ActionVerification(VERIFY_USER_SURE,
-        r"""function ()
+            "python": lambda ri: len(ri.res.preambulars) > 0 and len(ri.res.operatives) > 0 and len(ri.res.sponsors) > 0},
+    {"verificationID": VERIFY_USER_SURE,
+        "js": r"""function ()
             {
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
             }""",
-        lambda ri: True),
-    #FIXME: Make this legit once we implement amendments.
-    ActionVerification(VERIFY_NO_OUTSTANDING_AMENDMENTS, "function() { return true; }", lambda ri: True),
-    ActionVerification(VERIFY_USER_SURE_AND_ADDED_COMMENTS,
-        r"""function()
+            "python": lambda ri: True},
+    {"verificationID": VERIFY_USER_SURE_AND_ADDED_COMMENTS,
+        "js": r"""function()
             {
               if (!cr.comments)
               {
@@ -44,16 +38,15 @@ ActionVerifications = [ActionVerification(VERIFY_FULL_RESOLUTION,
               }
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
             }""",
-        lambda ri: bool(ri.comments)),
-    #FIXME: Make this legit once we ipmlement translation
-    ActionVerification(VERIFY_RESOLUTIONS_MATCH, "function () { return true; }", lambda ri: True),
-    ActionVerification(YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
-        r"""function ()
+            "python": lambda ri: bool(ri.comments)},
+    {"verificationID": VERIFY_RESOLUTIONS_MATCH, "js": "function () { return true; }", "python": lambda ri: True},
+    {"verificationID": YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
+        "js": r"""function ()
             {
               alert("WARNING! The draft resolution and all amendments were already approved, so there should be no need to modify the resolution. If you reject it, please add comments. It will be sent to the head of Conference Services for review.");
               return confirm("Are you sure you want to reject this resolution?");
             }""",
-        lambda ri: True)]
+            "python": lambda ri: True}]
 
 def verify(verificationID, ri):
     for verificatonTuple in ActionVerifications:

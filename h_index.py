@@ -14,13 +14,13 @@ def _getGeneratedValues(user):
     ret["resolutions"] = dblayer.getUserResolutions(user)
     ret["resolutionActions"] = {}
     for res in ret["resolutions"]:
-        ret["resolutionActions"][res.resolutionId] = [getSerializableVersion(ra) for ra in user.getResolutionActions(res.status)]
+        ret["resolutionActions"][res["resolutionId"]] = [getSerializableVersion(ra) for ra in user.getResolutionActions(res["status"])]
     ret["committees"] = dblayer.getAllCommittees()
     ret["sortOrder"] = user.getConcernedResolutionsOrder()
     ret["englishRPs"] = [u.__dict__ for u in dblayer.getEnglishRPs()]
     ret["spanishRPs"] = [u.__dict__ for u in dblayer.getSpanishRPs()]
-    ret["_verifications"] = {t[0]: t[1] for t in ActionVerifications}
-    ret["_actionDialogs"] = {t[0]: t[1] for t in ActionDialogs}
+    ret["_verifications"] = {t["verificationID"]: t["js"] for t in ActionVerifications}
+    ret["_actionDialogs"] = {t["dialogID"]: t["js"] for t in ActionDialogs}
     return ret
 
 _newButton = r"""<input type="button" value="New resolution" onclick="newResolution(%s)" name="newResolution" />"""

@@ -72,7 +72,7 @@ def getResolutionInfo(resolutionId):
     row = cursor.fetchone()
     if not row:
         raise NoSuchResolutionError()
-    ret = ResolutionInfo(ownerId = row[0], serializedResolutionObjectEnglish = None if row[1] == None else json.loads(row[1]), serializedResolutionObjectSpanish = None if row[2] == None else json.loads(row[2]), committeeId = row[3], status = row[4], index = row[5], topic = row[6], comments = row[7], originalAssigneeId = row[8], resolutionId = resolutionId)
+    ret = ResolutionInfo(ownerId = row[0], englishResolution = None if row[1] == None else json.loads(row[1]), spanishResolution = None if row[2] == None else json.loads(row[2]), committeeId = row[3], status = row[4], index = row[5], topic = row[6], comments = row[7], originalAssigneeId = row[8], resolutionId = resolutionId)
     return ret
 
 def getUserResolutions(user):
