@@ -267,6 +267,7 @@ function populateResolution(resolution)
 	window.currentRes = resolution;
 	$("#preambulars").empty();
 	$("#operatives").empty();
+    $("#sponsors").empty();
 	for (var i = 0; i < localizedRes.preambulars.length; ++i)
 	{
 		var toAdd = getPreambularToAdd(i, localizedRes.preambulars[i].keyword, localizedRes.preambulars[i].content);
