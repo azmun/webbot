@@ -1,6 +1,7 @@
 import dblayer
 import comm
 import collections
+import pdb
 
 ActionInfo = collections.namedtuple("ActionInfo",
         ["actionID", "displayName", "actionFunc", "dialog", "verifications", "expectToKeep"])
@@ -14,6 +15,7 @@ def saveResolution(ri, unused):
     dblayer.save(ri)
 
 def submitResolution(ri, unused):
+    pdb.set_trace()
     ri["status"] = DRAFT_BEING_PROCESSED
     ri["assigneeId"] = None
     lang = dblayer.getCommitteeLanguage(ri["committeeId"])

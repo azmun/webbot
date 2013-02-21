@@ -4,10 +4,11 @@ from ResolutionActions import *
 from ActionVerifications import *
 from languages import *
 import Filt
+import pdb
 
 #FIXME: Should the RPC just handle finals?
 
-(RAPPORTEUR, RP, RPC) = range(3)
+(RAPPORTEUR_ROLE, RP_ROLE, RPC_ROLE) = range(3)
 
 class NoCommitteeError(Exception):
     pass
@@ -19,15 +20,15 @@ class UnknownRoleError(Exception):
     pass
 
 def factory(uID, fullName, role, committeeId = None, language = None):
-    if role == RAPPORTEUR:
+    if role == RAPPORTEUR_ROLE:
         if committeeId == None:
             raise NoCommitteeError()
         return Rapporteur(uID, fullName, committeeId)
-    if role == RP:
+    if role == RP_ROLE:
         if not (language in [ENGLISH, SPANISH, BILINGUAL]):
             raise UnknownLanguageError()
         return ResolutionProcessor(uID, fullName, language)
-    if role == RPC:
+    if role == RPC_ROLE:
         if not (language in [ENGLISH, SPANISH, BILINGUAL]):
             raise UnknownLanguageError()
         return RPC(uID, fullName, language)
