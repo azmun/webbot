@@ -23,12 +23,23 @@ function isInt(value)
 function reconstructCurrentResolution()
 {
 	var cr = window.currentRes;
-	var newRes = {preambulars: [], operatives: [], committeeId: cr.committeeId, resolutionID: cr.resolutionID, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
+	var newRes = {englishResolution: {preambulars: [], operatives: []}, spanishResolution: {preambulars: [], operatives: []}, committeeId: cr.committeeId, resolutionID: cr.resolutionID, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
+    var lang = getLang(cr);
+    //FIXME: bilingual
+    var localizedRes;
+    if (lang == ENGLISH)
+    {
+        localizedRes = newRes.englishResolution;
+    }
+    else
+    {
+        localizedRes = newRes.spanishResolution
+    }
 	$(".preambular.").each(function ()
 			{
 				var kw = $(this).find(".keyword").val();
 				var ct = $(this).find(".content").val();
-				newRes.preambulars.push({keyword: kw, content: ct});
+				localizedRes.preambulars.push({keyword: kw, content: ct});
 			});
 	$(".operative").each(function ()
 			{
@@ -39,7 +50,7 @@ function reconstructCurrentResolution()
 				{
 					kw = null;
 				}
-				newRes.operatives.push({keyword: kw, content: ct, level: level});
+				localizedRes.operatives.push({keyword: kw, content: ct, level: level});
 			});
 	$(".sponsor").each(function ()
 			{
@@ -51,10 +62,15 @@ function reconstructCurrentResolution()
 	window.currentRes = newRes;
 }
 
+function getLang(res)
+{
+    return committees[res.committeeId].language;
+}
+
 function sendActionMessage(res, action, param)
 {
     var toSend = {};
-    if (lang == ENGLISH)
+    if (getLang(res) == ENGLISH)
     {
         toSend["english"] = res;
     }
@@ -236,20 +252,30 @@ function getPossibleSponsorsByCommittee(committeeId)
 
 function populateResolution(resolution)
 {
+    //FIXME: Bilingual
+    var localizedRes;
+    if (getLang(resolution) == ENGLISH)
+    {
+        localizedRes = resolution.englishResolution;
+    }
+    else
+    {
+        localizedRes = resolution.spanishResolution;
+    }
 	window.currentRes = resolution;
 	$("#preambulars").empty();
 	$("#operatives").empty();
-	for (var i = 0; i < resolution.preambulars.length; ++i)
+	for (var i = 0; i < localizedRes.preambulars.length; ++i)
 	{
-		var toAdd = getPreambularToAdd(i, resolution.preambulars[i].keyword, resolution.preambulars[i].content);
+		var toAdd = getPreambularToAdd(i, localizedRes.preambulars[i].keyword, localizedRes.preambulars[i].content);
 		$("#preambulars").append(toAdd);
 	}
 	var newClauseButton = $('<input type="button" id="newPreambularClauseButton" value="Insert new preambular clause"></input>');
 	newClauseButton.click(newPreambular);
 	$("#preambulars").append(newClauseButton);
-	for (var i = 0; i < resolution.operatives.length; ++i)
+	for (var i = 0; i < localizedRes.operatives.length; ++i)
 	{
-		var op = resolution.operatives[i];
+		var op = localizedRes.operatives[i];
 		if (i == 0 && op.level != 0)
 		{
 			_fuckup("nonzero level: " + op.level +" at beginning of ops");
@@ -320,7 +346,7 @@ function removeResolution()
 function getResolutionTag(res)
 {
     //FIXME
-    return "" + res.topicID + "/" + res.index;
+    return "" + res.topic + "/" + res.index;
 }
 
 function buildResolutionsTree(resolutions, order, howManyLevels)
@@ -365,6 +391,7 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
         }
         // now add the res tag to the highest levelParents.
         levelParents[levelParents.length - 1].push({"title": getResolutionTag(res), "resolution": res});
+        
         // make currentLevelElements[x] be resolutions[order[x]] for each x
         for (var x = 0; x < howManyLevels; ++x)
         {

@@ -101,25 +101,25 @@ def getSpanishRPs():
 
 def getAllCommittees():
     cursor = _getCursor()
-    cursor.execute("SELECT language, name, abbreviation, spanishName, englishName FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+    cursor.execute("SELECT language, name, abbreviation, spanishName, englishName, Committees.id FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     ret = {}
     for row in cursor.fetchall():
-        (language, name, abbreviation, spanishName, englishName) = (row[0], row[1], row[2], row[3], row[4])
+        (language, name, abbreviation, spanishName, englishName, committeeId) = (row[0], row[1], row[2], row[3], row[4], row[5])
         if not abbreviation in ret:
             if not language in (ENGLISH, SPANISH, BILINGUAL):
                 raise InvalidLanguageError()
-            ret[abbreviation] = {"abbreviation": abbreviation, "name": name, "language": language, "countries": [], "topics": []}
-        ci = ret[abbreviation]
+            ret[committeeId] = {"abbreviation": abbreviation, "name": name, "language": language, "countries": [], "topics": []}
+        ci = ret[committeeId]
         if language == ENGLISH and englishName:
             ci["countries"].append(englishName)
         elif language == SPANISH and spanishName:
             ci["countries"].append(spanishName)
         elif language == BILINGUAL and englishName and spanishName:
             ci["countries"].append((englishName, spanishName))
-    cursor.execute("SELECT abbreviation, englishName, spanishName FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+    cursor.execute("SELECT abbreviation, englishName, spanishName, Committees.id FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     for row in cursor.fetchall():
-        (abbreviation, englishName, spanishName) = (row[0], row[1], row[2])
-        ci = ret[abbreviation]
+        (abbreviation, englishName, spanishName, committeeId) = (row[0], row[1], row[2], row[3])
+        ci = ret[committeeId]
         lang = ci["language"]
         if lang == ENGLISH and englishName:
             ci["topics"].append(englishName)
