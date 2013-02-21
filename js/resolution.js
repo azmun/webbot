@@ -23,7 +23,7 @@ function isInt(value)
 function reconstructCurrentResolution()
 {
 	var cr = window.currentRes;
-	var newRes = {englishResolution: {preambulars: [], operatives: []}, spanishResolution: {preambulars: [], operatives: []}, committeeId: cr.committeeId, resolutionID: cr.resolutionID, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
+	var newRes = {englishResolution: {preambulars: [], operatives: []}, spanishResolution: {preambulars: [], operatives: []}, committeeId: cr.committeeId, resolutionId: cr.resolutionId, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
     var lang = getLang(cr);
     //FIXME: bilingual
     var localizedRes;
@@ -35,7 +35,7 @@ function reconstructCurrentResolution()
     {
         localizedRes = newRes.spanishResolution
     }
-	$(".preambular.").each(function ()
+	$(".preambular").each(function ()
 			{
 				var kw = $(this).find(".keyword").val();
 				var ct = $(this).find(".content").val();
@@ -72,23 +72,25 @@ function sendActionMessage(res, action, param)
     var toSend = {};
     if (getLang(res) == ENGLISH)
     {
-        toSend["english"] = res;
+        toSend["englishResolution"] = res.englishResolution;
     }
     //FIXME: BILINGUAL
     else
     {
-        toSend["spanish"] = res;
+        toSend["spanishResolution"] = res.spanishResolution;
     }
-    toSend["id"] = res.resolutionID;
+    toSend["id"] = res.resolutionId;
     toSend["comments"] = res.comments;
     toSend["action"] = action;
     toSend["param"] = param;
-    $.post('/action', toSend, function(data) {
+    $.post('/action', JSON.stringify(toSend), function(data) {
        if (! data.Success) {
            alert("An error has occurred! Please tell conference services.\nError: " + data.Error);
        }
-    }, 'json');
-
+    }, 'json').fail(function(_, textStatus, errorThrown)
+        {
+            alert(textStatus);
+        });
 }
 
 function performResolutionAction(action)
@@ -113,9 +115,9 @@ function performResolutionAction(action)
 	}
 	if (!action.expectToKeep)
 	{
-		forgetResolution(window.currentResolution.resolutionId);
+		forgetResolution(window.currentRes.resolutionId);
 	}
-	sendActionMessage(window.currentResolution, action.identifier, param);
+	sendActionMessage(window.currentRes, action.actionID, param);
 }
 
 function bindPreambular(i, elt)
@@ -336,7 +338,7 @@ function newResolution(committee)
 
 function removeResolution()
 {
-	window.currentResolution = null;
+	window.currentRes = null;
 	$("#preambulars").html("<p>No resolution selected.</p>");
 	$("#operatives").empty();
 	$("#sponsors").empty();

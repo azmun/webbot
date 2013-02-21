@@ -14,95 +14,95 @@ def saveResolution(ri, unused):
     dblayer.save(ri)
 
 def submitResolution(ri, unused):
-    ri.status = DRAFT_BEING_PROCESSED
-    ri.assigneeId = None
-    lang = dblayer.getCommitteeLanguage(ri.committeeId)
+    ri["status"] = DRAFT_BEING_PROCESSED
+    ri["assigneeId"] = None
+    lang = dblayer.getCommitteeLanguage(ri["committeeId"])
     usr = dblayer.getRPC_ID(lang)
-    ri.ownerID = usr
+    ri["ownerID"] = usr
     dblayer.save(ri)
     comm.push(ri, usr)
 
 def deleteResolution(ri, unused):
-    dblayer.delete(ri.resolutionId)
+    dblayer.delete(ri["resolutionId"])
 
 def resolutionPassed(ri, unused):
-    ri.status = PASSED_RESOLUTION_BEING_PROCESSED
-    lang = dblayer.getCommitteeLanguage(ri.committeeId)
-    ri.assigneeId = ri.originalAssigneeId
-    if ri.assigneeId == None:
-        ri.ownerId = dblayer.getRPC_ID(lang)
+    ri["status"] = PASSED_RESOLUTION_BEING_PROCESSED
+    lang = dblayer.getCommitteeLanguage(ri["committeeId"])
+    ri["assigneeId"] = ri["originalAssigneeId"]
+    if ri["assigneeId"] == None:
+        ri["ownerId"] = dblayer.getRPC_ID(lang)
     else:
-        ri.ownerId = ri.assigneeId
+        ri["ownerId"] = ri["assigneeId"]
     dblayer.save(ri)
-    comm.push(ri, ri.ownerId)
+    comm.push(ri, ri["ownerId"])
 
 def resolutionFailed(ri, unused):
-    ri.status = THE_DUSTBIN_OF_HISTORY
-    ri.ownerId = None
+    ri["status"] = THE_DUSTBIN_OF_HISTORY
+    ri["ownerId"] = None
     dblayer.save(ri)
 
 def acceptDraft(ri, unused):
-    lang = dblayer.getCommitteeLanguage(ri.committeeId)
+    lang = dblayer.getCommitteeLanguage(ri["committeeId"])
     if lang == BILINGUAL:
-        ri.status = ACCEPTED_DRAFT_BEING_TRANSLATED
+        ri["status"] = ACCEPTED_DRAFT_BEING_TRANSLATED
     else:
-        ri.status = ACCEPTED_DRAFT_WAITING_FOR_PRINTING
-    ri.assigneeId = None
-    ri.ownerId = dblayer.getRPC_ID(lang)
+        ri["status"] = ACCEPTED_DRAFT_WAITING_FOR_PRINTING
+    ri["assigneeId"] = None
+    ri["ownerId"] = dblayer.getRPC_ID(lang)
     dblayer.save(ri)
-    comm.push(ri, ri.ownerId)
+    comm.push(ri, ri["ownerId"])
 
 def rejectDraft(ri, unused):
-    ri.status = RETURNED_DRAFT
-    usr = dblayer.getCommitteeRapporteurID(ri.committeeId)
-    ri.ownerId = usr
+    ri["status"] = RETURNED_DRAFT
+    usr = dblayer.getCommitteeRapporteurID(ri["committeeId"])
+    ri["ownerId"] = usr
     dblayer.save(ri)
     comm.push(ri, usr)
 
 def translationFinished(ri, unused):
-    ri.status = ACCEPTED_DRAFT_WAITING_FOR_PRINTING
-    ri.assigneeId = ri.originalAssigneeId
-    ri.ownerId = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri.committeeId))
+    ri["status"] = ACCEPTED_DRAFT_WAITING_FOR_PRINTING
+    ri["assigneeId"] = ri["originalAssigneeId"]
+    ri["ownerId"] = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri["committeeId"]))
     dblayer.save(ri)
-    comm.push(ri, ri.ownerId)
+    comm.push(ri, ri["ownerId"])
 
 def acceptFinal(ri, unused):
-    ri.status = PASSED_RESOLUTION_WAITING_FOR_PRINTING
-    ri.ownerId = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri.committeeId))
+    ri["status"] = PASSED_RESOLUTION_WAITING_FOR_PRINTING
+    ri["ownerId"] = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri["committeeId"]))
     dblayer.save(ri)
-    comm.push(ri, ri.ownerId)
+    comm.push(ri, ri["ownerId"])
 
 def rejectFinal(ri, unused):
-    ri.status = SERIOUS_WTF
-    ri.ownerId = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri.committeeId))
+    ri["status"] = SERIOUS_WTF
+    ri["ownerId"] = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri["committeeId"]))
     dblayer.save(ri)
-    comm.push(ri, ri.ownerId)
+    comm.push(ri, ri["ownerId"])
 
 def assignDraft(ri, rpParam):
-    ri.assigneeId = rpParam
-    ri.originalAssigneeId = rpParam
-    ri.ownerId = rpParam
+    ri["assigneeId"] = rpParam
+    ri["originalAssigneeId"] = rpParam
+    ri["ownerId"] = rpParam
     dblayer.save(ri)
     comm.push(ri, rpParam)
 
 def draftPrinted(ri, unused):
-    ri.status = PRINTED_DRAFT
-    user = dblayer.getCommitteeRapporteurID(ri.committeeId)
-    ri.ownerId = user
+    ri["status"] = PRINTED_DRAFT
+    user = dblayer.getCommitteeRapporteurID(ri["committeeId"])
+    ri["ownerId"] = user
     dblayer.save(ri)
-    comm.setMessage(ri, user, "Draft printed!", "The draft resolution {} has been printed; go pick it up!".format(ri.resolutionId))
+    comm.setMessage(ri, user, "Draft printed!", "The draft resolution {} has been printed; go pick it up!".format(ri["resolutionId"]))
     comm.push(ri, user)
 
 def assignForTranslation(ri, translatorParam):
-    ri.assigneeId = translatorParam
-    ri.ownerId = translatorParam
+    ri["assigneeId"] = translatorParam
+    ri["ownerId"] = translatorParam
     dblayer.save(ri)
     comm.push(ri, translatorParam)
 
 def finalPrinted(ri, unused):
-    ri.status = PRINTED_FINAL_RESOLUTION
-    user = dblayer.getCommitteeRapporteurID(ri.committeeId)
-    ri.ownerId = user
+    ri["status"] = PRINTED_FINAL_RESOLUTION
+    user = dblayer.getCommitteeRapporteurID(ri["committeeId"])
+    ri["ownerId"] = user
     dblayer.save(ri)
-    comm.setMessage(ri, user, "Final resolution printed!", "The final resolution {} has been printed; go pick it up!".format(ri.resolutionId))
+    comm.setMessage(ri, user, "Final resolution printed!", "The final resolution {} has been printed; go pick it up!".format(ri["resolutionId"]))
     comm.push(ri, user)

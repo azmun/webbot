@@ -2,6 +2,7 @@ import webapp2
 import logging
 from google.appengine.api import users
 import dblayer
+import json
 
 class ValidUserRequestHandler(webapp2.RequestHandler):
     def writeInvalidUser(self):
@@ -39,5 +40,5 @@ class ValidUserJSONHandler(ValidUserRequestHandler):
     def writeNotLoggedIn(self):
         self.writeRequestErrorResponse("NOT_LOGGED_IN")
     def writeRequestErrorResponse(self, error):
-        self.out.response.write({"Error": error, "Success": False})
+        self.response.out.write(json.dumps({"Error": error, "Success": False}))
 

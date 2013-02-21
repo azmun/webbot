@@ -6,10 +6,11 @@ import ResolutionActions
 import ResolutionInfo
 from ValidUserRequestHandler import ValidUserJSONHandler
 import dblayer
+import pdb
 
 def performAction(UId, ri, actionTuple, param):
-    oldRI = dblayer.getResolutionInfo(ri.resolutionId)
-    if not oldRI.ownerId == UId:
+    oldRI = dblayer.getResolutionInfo(ri['resolutionId'])
+    if not oldRI['ownerId'] == UId:
         return None, "USER_DOESNT_OWN_RESOLUTION"
     try:
         actionTuple.actionFunc(ri, param)
@@ -19,13 +20,14 @@ def performAction(UId, ri, actionTuple, param):
 
 
 class ActionHandler(ValidUserJSONHandler):
-    def convertResolutionObject(self, rco): #why is this necessary
+    def convertResolutionObject(self, rco): #why is this necessary? To make sure they didn't fuck with the constants.
         ri = dblayer.getResolutionInfo(rco['id'])
-        if 'spanish' in rco:
-            ri.spanishResolution = rco['spanish']
-        if 'english' in rco:
-            ri.englishResolution = rco['english']
-        ri.comments = rco['comments']
+        if 'spanishResolution' in rco:
+            ri['spanishResolution'] = rco['spanishResolution']
+        if 'englishResolution' in rco:
+            ri['englishResolution'] = rco['englishResolution']
+        ri['comments'] = rco['comments']
+        return ri
     def postWithUser(self):
         try:
             resolutionClientObject = json.loads(self.request.body)
@@ -37,7 +39,7 @@ class ActionHandler(ValidUserJSONHandler):
         except:
             self.writeRequestErrorResponse("CANT_CONVERT_RESOLUTION")
             return
-        actions = self.wbUser.getResolutionActions(ri.status)
+        actions = self.wbUser.getResolutionActions(ri['status'])
         try:
             action = next(x for x in actions if x.actionID == resolutionClientObject["action"])
         except (ValueError, KeyError):
@@ -54,7 +56,7 @@ class ActionHandler(ValidUserJSONHandler):
             actionParam = resolutionClientObject["param"]
         except KeyError:
             actionParam = None
-        result, err = performAction(self.wbUser.UId, ri, action, param)
+        result, err = performAction(self.wbUser.getUId(), ri, action, actionParam)
         if (err):
             self.writeRequestErrorResponse(err)
             return
