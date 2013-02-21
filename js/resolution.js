@@ -312,9 +312,10 @@ function populateResolution(resolution)
 	$("#comments").removeAttr("disabled");
 	$("#comments").val(resolution.comments);
 	$("#actions").empty();
-	for (var i = 0; i < resolution.actions.length; ++i)
+    var actions = resolutionActions[resolution.resolutionId]
+	for (var i = 0; i < actions.length; ++i)
 	{
-		$("#actions").append($('<input type="button"></input>').val(resolutionActions[resolution.id][i].displayName).click(_bind(resolution.actions[i], performResolutionAction)));
+		$("#actions").append($('<input type="button"></input>').val(actions[i].displayName).click(_bind(actions[i], performResolutionAction)));
 	}
 }
 
