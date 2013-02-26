@@ -32,7 +32,8 @@ class NewHandler(ValidUserRequestHandler):
             topicNames = [t[0] for t in topics]
         else:
             topicNames = [t[1] for t in topics]
-        topicOptions = string.join(['<option value="%d">%d) %s</option>' % (idx, idx, val) for idx, val in enumerate(topicNames)])
+        topicIndices = [t[2] for t in topics]
+        topicOptions = string.join(['<option value="%d">%d) %s</option>' % (idx, idx, val) for val, idx in zip(topicNames, topicIndices)])
         if len(indexOptions) > 0:
             firstTopicIndexOptions = indexOptions[0]
         else:
