@@ -4,7 +4,8 @@ USE webbot;
 CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	language INT NOT NULL,
     abbreviation VARCHAR(5) NOT NULL,
-	name VARCHAR(255) NOT NULL );
+	displayNameEnglish VARCHAR(255),
+	displayNameSpanish VARCHAR(255));
 
 CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,

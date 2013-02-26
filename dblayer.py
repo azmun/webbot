@@ -69,7 +69,11 @@ def getCommitteeLanguage(committeeId):
 
 def getResolutionInfo(resolutionId):
     cursor = _getCursor()
-    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, comments, originalAssigneeId, assigneeId FROM Resolutions WHERE id=%s", resolutionId)
+    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish,
+            serializedResolutionObjectSpanish, committeeId, `status`, `index`,
+            topicIndex, comments, originalAssigneeId, assigneeId FROM
+            Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId ==
+            CommitteeTopics.id WHERE id=%s", resolutionId)
     row = cursor.fetchone()
     if not row:
         raise NoSuchResolutionError()
@@ -80,7 +84,11 @@ def getUserResolutions(user):
     filt = user.getConcernedResolutionsFilter()
     whereString = string.join([_getFilterString(t) for t in filt], " AND ")
     orderString = string.join(["`%s`" % s for s in user.getConcernedResolutionsOrder()], ", ")
-    queryString = "SELECT ownerId, id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions WHERE " + whereString + " ORDER BY " + orderString
+    queryString = "SELECT ownerId, Resolutions.id,
+    serializedResolutionObjectEnglish, serializedResolutionObjectSpanish,
+    committeeId, `status`, `index`, topicIndex, assigneeId, comments,
+    originalAssigneeId FROM Resolutions INNER JOIN CommitteeTopics ON
+    Resolutions.topicId == CommitteeTopics.id WHERE " + whereString + " ORDER BY " + orderString
     params = Utils.shallowFlatten([t[2] for t in filt])
     cursor = _getCursor()
     if len(params):
@@ -102,14 +110,19 @@ def getSpanishRPs():
 
 def getAllCommittees():
     cursor = _getCursor()
-    cursor.execute("SELECT language, name, abbreviation, spanishName, englishName, Committees.id FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+    cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviation, spanishName, englishName, Committees.id FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     ret = {}
     for row in cursor.fetchall():
-        (language, name, abbreviation, spanishName, englishName, committeeId) = (row[0], row[1], row[2], row[3], row[4], row[5])
+        (language, displayNameEnglish, displayNameSpanish, abbreviation,
+                spanishName, englishName, committeeId) = (row[0], row[1],
+                        row[2], row[3], row[4], row[5], row[6])
         if not abbreviation in ret:
             if not language in (ENGLISH, SPANISH, BILINGUAL):
                 raise InvalidLanguageError()
-            ret[committeeId] = {"abbreviation": abbreviation, "name": name, "language": language, "countries": [], "topics": []}
+            ret[committeeId] = {"abbreviation": abbreviation,
+                    "displayNameEnglish":
+                    displayNameEnglish, "displayNameSpanish":
+                    displayNameSpanish, "language": language, "countries": [], "topics": []}
         ci = ret[committeeId]
         if language == ENGLISH and englishName:
             ci["countries"].append(englishName)
