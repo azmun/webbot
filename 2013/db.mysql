@@ -1,0 +1,11 @@
+USE webbot;
+
+INSERT INTO Committees (id, language, abbreviation, displayNameEnglish, displayNameSpanish) VALUES (1, 0, 'GA3', 'The General Assembly', NULL), (2, 2, 'SC', 'The Security Council', 'El Consejo de Seguridad');
+
+INSERT INTO Users (fullName, email, role, committeeId, language) VALUES ('Elizabeth Porter', 'elizabethporter@email.arizona.edu', 0, 1, 0), ('Joice Hildenbrand', 'jnhildenbrand@email.arizona.edu', 1, NULL, 0), ('Brennan Vincent', 'brennanv@email.arizona.edu', 2, NULL, 0);
+
+INSERT INTO Countries (id, englishName, spanishName, englishLongName, spanishLongName) VALUES (1, 'Panama', 'Panamá', 'The Republic of Panama', 'La República de Panamá'), (2, 'United States', 'Estados Unidos', 'The United States of America', 'Los Estados Unidos de América');
+
+INSERT INTO CommitteeCountries (committeeId, countryId) VALUES (1, 1), (1, 2);
+
+INSERT INTO CommitteeTopics (committeeId, `index`, englishName, spanishName) VALUES (1, 1, 'The Status of Transitions in Libya, Egypt, and Tunisia', NULL), (1, 2, 'Increasing Women\'s Political Participation in All Contexts: Peace, Conflict, and Political Transition', NULL), (1, 3, 'Respecting the Rights of Protesters in the Middle East', NULL);
