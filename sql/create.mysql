@@ -1,28 +1,10 @@
 DROP DATABASE IF EXISTS webbot;
 CREATE DATABASE webbot;
 USE webbot;
-CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	serializedResolutionObjectEnglish TEXT,
-    serializedResolutionObjectSpanish TEXT,
-	committeeId INT NOT NULL,
-	`status` INT NOT NULL,
-	`index` INT NOT NULL,
-	topicIndex INT NOT NULL,
-	assigneeId INT,
-	originalAssigneeId INT,
-	ownerId INT NOT NULL,
-	comments TEXT,
-    UNIQUE KEY (committeeId, topicIndex, `index`),
-	FOREIGN KEY (committeeId) REFERENCES Committees(id),
-	FOREIGN KEY (topicIndex) REFERENCES CommitteeTopics(`index`),
-	FOREIGN KEY (assigneeId) REFERENCES Users(id),
-	FOREIGN KEY (originalAssigneeId) REFERENCES Users(id),
-	FOREIGN KEY (ownerId) REFERENCES Users(id));
-
-CREATE TABLE ResolutionSponsors(resolutionId INT NOT NULL,
-	countryId INT NOT NULL,
-	FOREIGN KEY (resolutionId) REFERENCES Resolutions(id) ON DELETE CASCADE,
-	FOREIGN KEY (countryId) REFERENCES Countries(id));
+CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	language INT NOT NULL,
+    abbreviation VARCHAR(5) NOT NULL,
+	name VARCHAR(255) NOT NULL );
 
 CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
@@ -32,10 +14,6 @@ CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	language INT NOT NULL,
 	FOREIGN KEY (committeeId) REFERENCES Committees(id));
 
-CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	language INT NOT NULL,
-    abbreviation VARCHAR(5) NOT NULL,
-	name VARCHAR(255) NOT NULL );
 
 CREATE TABLE Countries(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	englishName VARCHAR(255) NOT NULL ,
@@ -46,9 +24,29 @@ CREATE TABLE CommitteeCountries(committeeId INT NOT NULL,
 	FOREIGN KEY (committeeId) REFERENCES Committees(id),
 	FOREIGN KEY (countryId) REFERENCES Countries(id));
 
-CREATE TABLE CommitteeTopics(committeeId INT NOT NULL,
+CREATE TABLE CommitteeTopics(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	committeeId INT NOT NULL,
 	`index` INT NOT NULL,
 	spanishName VARCHAR(255) ,
 	englishName VARCHAR(255) ,
 	FOREIGN KEY (committeeId) REFERENCES Committees(id),
 	UNIQUE KEY (committeeId, `index`));
+CREATE TABLE Resolutions (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	serializedResolutionObjectEnglish TEXT,
+    serializedResolutionObjectSpanish TEXT,
+	topicId INT NOT NULL,
+	`status` INT NOT NULL,
+	`index` INT NOT NULL,
+	assigneeId INT,
+	originalAssigneeId INT,
+	ownerId INT NOT NULL,
+	comments TEXT,
+	FOREIGN KEY (topicId) REFERENCES CommitteeTopics(`id`),
+	FOREIGN KEY (assigneeId) REFERENCES Users(id),
+	FOREIGN KEY (originalAssigneeId) REFERENCES Users(id),
+	FOREIGN KEY (ownerId) REFERENCES Users(id));
+
+CREATE TABLE ResolutionSponsors(resolutionId INT NOT NULL,
+	countryId INT NOT NULL,
+	FOREIGN KEY (resolutionId) REFERENCES Resolutions(id) ON DELETE CASCADE,
+	FOREIGN KEY (countryId) REFERENCES Countries(id));
