@@ -5,11 +5,12 @@ ActionDialogs = [{"dialogID": PICK_RP,
         {
             var answer;
             promptStr = "";
-            if (res.language == ENGLISH)
+            //FIXME
+            if (getLang(res) == ENGLISH)
             {
                 var RPs = englishRPs;
             }
-            else if (res.language == SPANISH || res.language == BILINGUAL)
+            else
             {
                 var RPs = spanishRPs
             }
@@ -17,7 +18,7 @@ ActionDialogs = [{"dialogID": PICK_RP,
             {
                 promptStr += i;
                 promptStr += ") ";
-                promptStr += RPs[i].fullName;
+                promptStr += RPs[i]._fullName;
                 promptStr += "\n";
             }
             while (true)
@@ -27,7 +28,7 @@ ActionDialogs = [{"dialogID": PICK_RP,
                 {
                     if (+answer >= 0 && +answer < RPs.length)
                     {
-                        return RPs[+answer].uID;
+                        return {'param': RPs[+answer]._uId, 'OK': true};
                     }
                 }
             }

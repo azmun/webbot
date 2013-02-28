@@ -117,21 +117,27 @@ function getLocalizedRes(resolution)
 	}
 }
 
+function buildFunc(str)
+{
+	return eval('function foo() { return ' + str + '; }; foo();');
+}
+
 function performResolutionAction(action)
 {
 	reconstructCurrentResolution();
 	for (var i = 0; i < action.verifications.length; ++i)
 	{
-		var f = eval('function foo() { return ' + _verifications[action.verifications[i]] + '; }; foo();');
+		var f = buildFunc(_verifications[action.verifications[i]]);
 		if (! f())
 		{
 			return;
 		}
 	}
 	var param = null;
-	if (action.dialog)
+	if (action.dialog !== null)
 	{
-		var dialogResult = _actionDialogs[action.dialog]();
+		var f = buildFunc(_actionDialogs[action.dialog]);
+		var dialogResult = f(window.currentRes);
 		if (!dialogResult.OK)
 		{
 			return;
