@@ -22,7 +22,7 @@ def submitResolution(ri, unused):
     ri["assigneeId"] = None
     lang = dblayer.getCommitteeLanguage(ri["committeeId"])
     usr = dblayer.getRPC_ID(lang)
-    ri["ownerID"] = usr
+    ri["ownerId"] = usr
     dblayer.save(ri)
     comm.push(ri, usr)
 

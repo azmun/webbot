@@ -57,8 +57,9 @@ def _getFilterString(tup):
         return "`%s` IN (" % field + string.join(["%s"] * len(val), ", ") +")"
 
 def getRPC_ID(lang):
+    pdb.set_trace()
     cursor = _getCursor()
-    cursor.execute("SELECT id FROM Users WHERE role=%s AND language=%s", (User.RPC, lang))
+    cursor.execute("SELECT id FROM Users WHERE role=%s AND language=%s", (User.RPC_ROLE, lang))
     row = cursor.fetchone()
     if not row:
         raise NoSuchUserError()
@@ -66,7 +67,7 @@ def getRPC_ID(lang):
 
 def getCommitteeRapporteurID(committeeId):
     cursor = _getCursor()
-    cursor.execute("SELECT id FROM Users WHERE committeeId=%s AND role=%s", (committeeId, User.RAPPORTEUR))
+    cursor.execute("SELECT id FROM Users WHERE committeeId=%s AND role=%s", (committeeId, User.RAPPORTEUR_ROLE))
     row = cursor.fetchone()
     if not row:
         raise NoSuchUserError()
@@ -213,8 +214,8 @@ def save(ri):
         raise NoSuchTopicError()
     topicId = topicRow[0]
     if (ri["resolutionId"] != None):
-        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, topicId=%s, status=%s, `index`=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), topicId, ri["status"], ri["index"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], ri["resolutionId"]))
+        cursor.execute("UPDATE Resolutions SET ownerId=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, topicId=%s, status=%s, `index`=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), topicId, ri["status"], ri["index"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], ri["resolutionId"]))
     else:
-        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, status, `index`, topicId, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri["ownerId"], json.dumps(ri["resolution"]), ri["status"], ri["index"], topicId, ri["assigneeId"], ri["originalAssigneeId"], ri["comments"]))
+        cursor.execute("INSERT INTO Resolutions (ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, status, `index`, topicId, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), ri["status"], ri["index"], topicId, ri["assigneeId"], ri["originalAssigneeId"], ri["comments"]))
     cursor.close()
     _commit()
