@@ -25,7 +25,7 @@ class NewHandler(ValidUserRequestHandler):
         committee = dblayer.getCommitteeHusk(committeeId)
         committeeOptions = '<option value="%d">%s</option>' % (committeeId, committee["abbreviation"])
         topics = dblayer.getCommitteeTopics(committeeId)
-        indexOptions = [self.getTopicIndexOptions(i, committeeId) for i in range(len(topics))]
+        indexOptions = {tup[2]: self.getTopicIndexOptions(tup[2], committeeId) for tup in topics}
         indexOptionsStr = json.dumps(indexOptions)
         path = os.path.join(os.path.dirname(__file__), 'new_resolution.html')
         if committee["language"] == ENGLISH:
@@ -35,7 +35,7 @@ class NewHandler(ValidUserRequestHandler):
         topicIndices = [t[2] for t in topics]
         topicOptions = string.join(['<option value="%d">%d) %s</option>' % (idx, idx, val) for val, idx in zip(topicNames, topicIndices)])
         if len(indexOptions) > 0:
-            firstTopicIndexOptions = indexOptions[0]
+            firstTopicIndexOptions = indexOptions[topics[0][2]]
         else:
             firstTopicIndexOptions = ''
         self.response.out.write(template.render(path,

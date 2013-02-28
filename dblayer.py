@@ -201,7 +201,9 @@ def createNewResolution(committeeId, index, topic, ownerId):
 def getCommitteeUsedIndices(committeeId, topic):
     cursor = _getCursor()
     cursor.execute("SELECT Resolutions.`index` FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id WHERE CommitteeTopics.committeeId=%s AND CommitteeTopics.`index`=%s ORDER BY `index` ASC", (committeeId, topic))
-    return [row[0] for row in cursor.fetchall()]
+    ret = [row[0] for row in cursor.fetchall()]
+    logging.info("Committee %d, topic %d has %d used indices." % (committeeId, topic, len(ret)))
+    return ret
 
 def save(ri):
     cursor = _getCursor()
