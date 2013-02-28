@@ -52,7 +52,7 @@ def _getCursor():
 def _getFilterString(tup):
     (field, op, val) = (tup[0], tup[1], tup[2])
     if op == Filt.EQ:
-        return field + "=%s"
+        return field + "<=>%s"
     if op == Filt.IN:
         return "`%s` IN (" % field + string.join(["%s"] * len(val), ", ") +")"
 

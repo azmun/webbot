@@ -314,7 +314,7 @@ function populateResolution(resolution)
 			_fuckup("negative level: " + op.level);
 			return;
 		}
-		var toAdd = getOperativeToAdd(i, op.level, op.keyword, op,content); //keyword may not exist, but it's dgaf
+		var toAdd = getOperativeToAdd(i, op.level, op.keyword, op.content); //keyword may not exist, but it's dgaf
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause"></input>').click(_bind(-1, newOperativeIn)));

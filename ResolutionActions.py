@@ -3,6 +3,7 @@ import comm
 import collections
 import pdb
 from ResolutionStatuses import *
+from ActionDialogs import *
 
 ActionInfo = collections.namedtuple("ActionInfo",
         ["actionID", "displayName", "actionFunc", "dialog", "verifications", "expectToKeep"])
