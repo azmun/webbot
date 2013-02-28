@@ -82,7 +82,7 @@ def getCommitteeLanguage(committeeId):
 
 def getResolutionInfo(resolutionId):
     cursor = _getCursor()
-    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, `index`, topicIndex, comments, originalAssigneeId, assigneeId FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId == CommitteeTopics.id WHERE id=%s", resolutionId)
+    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index`, comments, originalAssigneeId, assigneeId FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id WHERE Resolutions.id=%s", resolutionId)
     row = cursor.fetchone()
     if not row:
         raise NoSuchResolutionError()
@@ -207,9 +207,14 @@ def getCommitteeUsedIndices(committeeId, topic):
 
 def save(ri):
     cursor = _getCursor()
+    cursor.execute("SELECT id FROM CommitteeTopics WHERE committeeId=%s AND `index`=%s", (ri["committeeId"], ri["topic"]))
+    topicRow = cursor.fetchone()
+    if not topicRow:
+        raise NoSuchTopicError()
+    topicId = topicRow[0]
     if (ri["resolutionId"] != None):
-        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, committeeId=%s, status=%s, `index`=%s, topicIndex=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), ri["committeeId"], ri["status"], ri["index"], ri["topic"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], ri["resolutionId"]))
+        cursor.execute("UPDATE Resolutions SET ownerID=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, topicId=%s, status=%s, `index`=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), topicId, ri["status"], ri["index"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], ri["resolutionId"]))
     else:
-        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, status, `index`, topicIndex, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri["ownerId"], json.dumps(ri["resolution"]), ri["committeeId"], ri["status"], ri["index"], ri["topic"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"]))
+        cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, status, `index`, topicId, assigneeId, originalAssigneeId, comments) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri["ownerId"], json.dumps(ri["resolution"]), ri["status"], ri["index"], topicId, ri["assigneeId"], ri["originalAssigneeId"], ri["comments"]))
     cursor.close()
     _commit()

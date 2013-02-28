@@ -2,6 +2,7 @@ import dblayer
 import comm
 import collections
 import pdb
+from ResolutionStatuses import *
 
 ActionInfo = collections.namedtuple("ActionInfo",
         ["actionID", "displayName", "actionFunc", "dialog", "verifications", "expectToKeep"])

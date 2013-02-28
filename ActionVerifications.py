@@ -4,12 +4,13 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
     "js": r"""function ()
             {
               var cr = window.currentRes;
-              if (cr.preambulars.length == 0)
+              var loc = getLocalizedRes(cr);
+              if (loc.preambulars.length == 0)
               {
                 alert("A valid resolution must have at least one preambular clause.");
                 return false;
               }
-              if (cr.operatives.length == 0)
+              if (loc.operatives.length == 0)
               {
                 alert("A valid resolution must have at least one operative clause.");
                 return false;
@@ -21,7 +22,8 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
               }
               return true;
             }""",
-            "python": lambda ri: len(ri.res.preambulars) > 0 and len(ri.res.operatives) > 0 and len(ri.res.sponsors) > 0},
+            #FIXME
+            "python": lambda ri: True},
     {"verificationID": VERIFY_USER_SURE,
         "js": r"""function ()
             {
@@ -31,6 +33,9 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
     {"verificationID": VERIFY_USER_SURE_AND_ADDED_COMMENTS,
         "js": r"""function()
             {
+              var cr = window.currentRes;
+              var loc = getLocalizedRes(cr);
+
               if (!cr.comments)
               {
                 alert("If you are rejecting this resolution, please add some comments describing what is wrong with it.");
@@ -38,7 +43,7 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
               }
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
             }""",
-            "python": lambda ri: bool(ri.comments)},
+            "python": lambda ri: bool(ri["comments"])},
     {"verificationID": VERIFY_RESOLUTIONS_MATCH, "js": "function () { return true; }", "python": lambda ri: True},
     {"verificationID": YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
         "js": r"""function ()
@@ -49,7 +54,7 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
             "python": lambda ri: True}]
 
 def verify(verificationID, ri):
-    for verificatonTuple in ActionVerifications:
-        if verificationTuple[0] == verificationID:
-            return verificationTuple[2](ri)
+    for verification in ActionVerifications:
+        if verification["verificationID"] == verificationID:
+            return verification["python"](ri)
     return True #FIXME : This is a big WTF, log it.

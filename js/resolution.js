@@ -1,12 +1,6 @@
 Array.prototype.insert = function (index, item) {
 	this.splice(index, 0, item);
 };
-// Array Remove - By John Resig (MIT Licensed)
-Array.remove = function (array, from, to) {
-	var rest = array.slice((to || from) + 1 || array.length);
-	array.length = from < 0 ? array.length + from : from;
-	return array.push.apply(array, rest);
-};
 
 function _bind(i, f)
 {
@@ -54,7 +48,7 @@ function reconstructCurrentResolution()
 			});
 	$(".sponsor").each(function ()
 			{
-				if ($(this).attr("checked"))
+				if ($(this).prop("checked"))
 				{
 					newRes.sponsors.push($(this).data('country'));
 				}
@@ -93,12 +87,43 @@ function sendActionMessage(res, action, param)
         });
 }
 
+function forgetResolution(resolutionId)
+{
+	if (window.currentRes.resolutionId == resolutionId)
+	{
+		removeResolution();
+	}
+	for (var i = 0; i < resolutions.length; ++i)
+	{
+		if (resolutions[i].resolutionId == resolutionId)
+		{
+			resolutions.splice(i, 1);
+			rebuildTree();
+			return;
+		}
+	}
+}
+
+function getLocalizedRes(resolution)
+{
+	//HUGE WTF FIXME
+	if (getLang(resolution) == ENGLISH)
+	{
+		return resolution.englishResolution;
+	}
+	else
+	{
+		return resolution.spanishResolution;
+	}
+}
+
 function performResolutionAction(action)
 {
 	reconstructCurrentResolution();
 	for (var i = 0; i < action.verifications.length; ++i)
 	{
-		if (! _verifications[action.verifications[i]]())
+		var f = eval('function foo() { return ' + _verifications[action.verifications[i]] + '; }; foo();');
+		if (! f())
 		{
 			return;
 		}
@@ -113,11 +138,11 @@ function performResolutionAction(action)
 		}
 		param = dialogResult.param;
 	}
+	sendActionMessage(window.currentRes, action.actionID, param);
 	if (!action.expectToKeep)
 	{
 		forgetResolution(window.currentRes.resolutionId);
 	}
-	sendActionMessage(window.currentRes, action.actionID, param);
 }
 
 function bindPreambular(i, elt)
@@ -405,8 +430,8 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
     return levelParents[0];
 }
 
-
-$(document).ready(function() {
+function rebuildTree()
+{
     var tree = buildResolutionsTree(resolutions, sortOrder, sortOrder.length >= 2 ? 2 : sortOrder.length);
     $("#menu").dynatree({
         children: tree,
@@ -414,5 +439,9 @@ $(document).ready(function() {
             populateResolution(node.data.resolution);
         }
     });
+}
+
+$(document).ready(function() {
+	rebuildTree();
 });
 

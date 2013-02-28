@@ -4,6 +4,9 @@ import webapp2
 import json
 import ResolutionActions
 import ResolutionInfo
+import ActionVerifications
+import traceback
+import logging
 from ValidUserRequestHandler import ValidUserJSONHandler
 import dblayer
 import pdb
@@ -15,6 +18,7 @@ def performAction(UId, ri, actionTuple, param):
     try:
         actionTuple.actionFunc(ri, param)
     except:
+        logging.error(traceback.print_exc())
         return None, "UNKNOWN_ERROR"
     return json.dumps({"Error": None, "Success": True}), None
 
@@ -37,6 +41,7 @@ class ActionHandler(ValidUserJSONHandler):
         try:
             ri = self.convertResolutionObject(resolutionClientObject)
         except:
+            logging.error(traceback.format_exc())
             self.writeRequestErrorResponse("CANT_CONVERT_RESOLUTION")
             return
         actions = self.wbUser.getResolutionActions(ri['status'])
