@@ -8,6 +8,7 @@ from ValidUserRequestHandler import ValidUserRequestHandler
 from ResolutionActions import getSerializableVersion
 import Enums
 import os
+import pdb
 
 def _getGeneratedValues(user):
     ret = {}
@@ -30,6 +31,7 @@ def _getNewButton(committee):
 
 class IndexHandler(ValidUserRequestHandler):
     def getWithUser(self):
+        pdb.set_trace()
         gvJson = json.dumps(_getGeneratedValues(self.wbUser))
         enumsJson = json.dumps(Enums.All)
         nic = ''
