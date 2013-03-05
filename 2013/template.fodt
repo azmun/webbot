@@ -137,7 +137,6 @@
  <office:styles>
  {{styles|safe}}
  </office:styles>
- <office:automatic-styles>
 <office:automatic-styles>
   <style:style style:name="P1" style:family="paragraph" style:parent-style-name="List_20_Paragraph" style:list-style-name="WW8Num1">
    <style:paragraph-properties fo:margin-left="1in" fo:margin-right="0in" fo:margin-top="0in" fo:margin-bottom="0.1402in" style:contextual-spacing="false" fo:text-indent="0in" style:auto-text-indent="false">
@@ -252,7 +251,6 @@
    <style:header-style/>
    <style:footer-style/>
   </style:page-layout>
- </office:automatic-styles>
  </office:automatic-styles>
  <office:body>
   <office:text>

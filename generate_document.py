@@ -2,6 +2,7 @@ from localization import get_str
 from google.appengine.ext.webapp import template
 from roman import toRoman
 import string 
+import pdb
 
 
 
@@ -30,20 +31,24 @@ def generate_document(res, lang, topic_name, committee_salutation_name, committe
     ops = []
     for idx, clause in enumerate(res["operatives"]):
         for i in range(len(current_indices), clause["level"] + 1):
-            current_indices.append(0)
+            current_indices.append(1)
         if last_level > clause["level"]:
             current_indices = current_indices[:clause["level"] + 1]
+            current_indices[clause["level"]] += 1
         elif last_level == clause["level"]:
-            ++current_indices[clause["level"]]
+            current_indices[clause["level"]] += 1
         last_level = clause["level"]
         if last_level > max_level:
             max_level = last_level
         index = current_indices[last_level]
         if "keyword" in clause:
             ops.append(u'<text:p text:style-name="ops-%d">%s. <text:span text:style-name="clause_keyword">%s </text:span><text:span text:style-name="clause_body">%s%s</text:span></text:p>' % (clause["level"], get_level_index(clause["level"], index), clause["keyword"], clause["content"], get_op_separator(res["operatives"], idx)))
+        else:
+            ops.append(u'<text:p text:style-name="ops-%d">%s. <text:span text:style-name="clause_body">%s%s</text:span></text:p>' % (clause["level"], get_level_index(clause["level"], index), clause["content"], get_op_separator(res["operatives"], idx)))
+
     ops_outline = string.join(ops, u'\n')
     styles = u'<style:style style:family="text" style:name="clause_keyword"><style:text-properties fo:font-style="italic" style:font-name-complex="Times New Roman"/></style:style>\n<style:style style:family="text" style:name="clause_body"><style:text-properties fo:font-style="normal" style:font-name-complex="Times New Roman"/></style:style>\n<style:style style:family="paragraph" style:name="preams"><style:paragraph-properties fo:margin-left="0.5in" fo:margin-bottom="0.14in"/></style:style>'
-    styles += string.join([u'<style:style style:family="paragraph" style:name="ops-%d"><style:paragraph-properties fo:margin-left="%fin" fo:margin-bottom="0.14in"/></style:style>' % (idx, 0.5 * idx) for idx in range(max_level + 1)], u'\n')
+    styles += string.join([u'<style:style style:family="paragraph" style:name="ops-%d"><style:paragraph-properties fo:margin-left="%fin" fo:margin-bottom="0.14in"/></style:style>' % (idx, 0.5 * (idx + 1)) for idx in range(max_level + 1)], u'\n')
 #FIXME: need two separate names for sponsors (one for sort order and one for full name) ???
     countries = string.join(res["sponsors"], ', ')
     tagline = u'%s/%s/%s%d' % (committee_abbr, toRoman(topic_index, True), get_str('DRAFT', lang) if isDraft else u'', res_index)
@@ -56,7 +61,10 @@ def generate_document(res, lang, topic_name, committee_salutation_name, committe
         'subj_of': get_str('TOPIC_OF', lang),
         'sub_to': get_str('SUBMITTED_TO', lang),
         'sub_by': get_str('SUBMITTED_BY', lang),
-        'outline': u'%s\n%s\n%s' % (salutation, preams_outline, ops_outline)
+        'outline': u'%s\n%s\n%s' % (salutation, preams_outline, ops_outline),
+        'topic': topic_name,
+        'committee': committee_salutation_name,
+        'countries': countries
         }
     return template.render('2013/template.fodt', templateValues)
 
