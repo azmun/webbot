@@ -72,6 +72,14 @@ def getCommitteeRapporteurID(committeeId):
         raise NoSuchUserError()
     return row[0]
 
+def getTopicAndCommitteeInfo(topicId):
+    cursor = _getCursor()
+    cursor.execute("SELECT `index`, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, englishName, spanishName FROM CommitteeTopics INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE CommitteeTopics.id=%s", topicId)
+    row = cursor.fetchone()
+    if not row:
+        raise NoSuchTopicError()
+    return {"topicIndex": row[0], "committeeAbbreviationEnglish": row[1], "committeeAbbreviationSpanish": row[2], "committeeDisplayNameEnglish": row[3], "committeeDisplayNameSpanish": row[4], "topicEnglishName": row[5], "topicSpanishName": row[6]}
+
 def getCommitteeLanguage(committeeId):
     cursor = _getCursor()
     cursor.execute("SELECT language FROM Committees WHERE id=%s", committeeId)
@@ -87,6 +95,10 @@ def getResolutionInfo(resolutionId):
     if not row:
         raise NoSuchResolutionError()
     ret = ResolutionInfo(ownerId = row[0], englishResolution = None if row[1] == None else json.loads(row[1]), spanishResolution = None if row[2] == None else json.loads(row[2]), committeeId = row[3], status = row[4], index = row[5], topic = row[6], comments = row[7], originalAssigneeId = row[8], resolutionId = resolutionId, assigneeId = row[9])
+    cursor.execute("SELECT englishName, spanishName, englishLongName, spanishLongName FROM Countries INNER JOIN ResolutionSponsors ON Countries.id = ResolutionSponsors.countryId WHERE ResolutionSponsors.resolutionId = %s", resolutionId)
+    ret["sponsors"] = []
+    for row in cursor.fetchall():
+        ret["sponsors"].append({"englishName": row[0], "spanishName": row[1], "englishLongName": row[2], "spanishLongName": row[3]})
     return ret
 
 def getUserResolutions(user):
@@ -117,16 +129,17 @@ def getSpanishRPs():
 
 def getAllCommittees():
     cursor = _getCursor()
-    cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviation, spanishName, englishName, Committees.id FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+    cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviationEnglish, abbreviationSpanish, spanishName, englishName, Committees.id FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     ret = {}
     for row in cursor.fetchall():
-        (language, displayNameEnglish, displayNameSpanish, abbreviation,
-                spanishName, englishName, committeeId) = (row[0], row[1],
-                        row[2], row[3], row[4], row[5], row[6])
-        if not abbreviation in ret:
+        (language, displayNameEnglish, displayNameSpanish, abbreviationEnglish,
+                abbreviationSpanish, spanishName, englishName, committeeId) = (row[0], row[1],
+                        row[2], row[3], row[4], row[5], row[6], row[7])
+        if not committeeId in ret:
             if not language in (ENGLISH, SPANISH, BILINGUAL):
                 raise InvalidLanguageError()
-            ret[committeeId] = {"abbreviation": abbreviation,
+            ret[committeeId] = {"abbreviationEnglish": abbreviationEnglish,
+                    "abbreviationSpanish": abbreviationSpanish,
                     "displayNameEnglish":
                     displayNameEnglish, "displayNameSpanish":
                     displayNameSpanish, "language": language, "countries": [], "topics": []}
@@ -137,9 +150,9 @@ def getAllCommittees():
             ci["countries"].append(spanishName)
         elif language == BILINGUAL and englishName and spanishName:
             ci["countries"].append((englishName, spanishName))
-    cursor.execute("SELECT abbreviation, englishName, spanishName, Committees.id FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+    cursor.execute("SELECT abbreviationEnglish, abbreviationSpanish, englishName, spanishName, Committees.id FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     for row in cursor.fetchall():
-        (abbreviation, englishName, spanishName, committeeId) = (row[0], row[1], row[2], row[3])
+        (abbreviationEnglish, abbreviationSpanish, englishName, spanishName, committeeId) = (row[0], row[1], row[2], row[3], row[4])
         ci = ret[committeeId]
         lang = ci["language"]
         if lang == ENGLISH and englishName:
@@ -167,12 +180,12 @@ def delete(resolutionId):
 
 def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
     cursor = _getCursor()
-    cursor.execute("SELECT language, abbreviation, displayNameEnglish, displayNameSpanish FROM Committees WHERE id=%s", (committeeId, ))
+    cursor.execute("SELECT language, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish FROM Committees WHERE id=%s", (committeeId, ))
     row = cursor.fetchone()
     if not row:
         raise NoSuchCommitteeError()
-    (language, abbreviation, displayNameEnglish, displayNameSpanish) = (row[0], row[1], row[2], row[3])
-    return {"language": language, "abbreviation": abbreviation, "displayNameSpanish": displayNameSpanish, "displayNameEnglish": displayNameEnglish}
+    (language, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish) = (row[0], row[1], row[2], row[3], row[4])
+    return {"language": language, "abbreviationEnglish": abbreviationEnglish, "abbreviationSpanish": abbreviationSpanish, "displayNameSpanish": displayNameSpanish, "displayNameEnglish": displayNameEnglish}
 
 def getCommitteeTopics(committeeId):
     logging.info("Getting committee topics with id=%s" % committeeId)

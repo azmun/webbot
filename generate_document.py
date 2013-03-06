@@ -3,6 +3,7 @@ from google.appengine.ext.webapp import template
 from roman import toRoman
 import string 
 import pdb
+from languages import *
 
 
 
@@ -22,7 +23,7 @@ def get_level_index(lvl, indx):
     if lvl % 3 == 2:
         return toRoman(indx, False)
 
-def generate_document(res, lang, topic_name, committee_salutation_name, committee_abbr, res_index, topic_index, isDraft):
+def generate_document(res, lang, topic_name, committee_salutation_name, committee_abbr, res_index, topic_index, isDraft, sponsors):
     salutation = u'<text:p text:style-name="preams"><text:span text:style-name="clause_keyword">%s,</text:span></text:p>' % committee_salutation_name
     preams_outline = string.join([u'<text:p text:style-name="preams"><text:span text:style-name="clause_keyword">%s </text:span><text:span text:style-name="clause_body">%s,</text:span></text:p>' % (clause["keyword"], clause["content"]) for clause in res["preambulars"]], u'\n')
     max_level = -1
@@ -41,7 +42,7 @@ def generate_document(res, lang, topic_name, committee_salutation_name, committe
         if last_level > max_level:
             max_level = last_level
         index = current_indices[last_level]
-        if "keyword" in clause:
+        if clause["level"] == 0:
             ops.append(u'<text:p text:style-name="ops-%d">%s. <text:span text:style-name="clause_keyword">%s </text:span><text:span text:style-name="clause_body">%s%s</text:span></text:p>' % (clause["level"], get_level_index(clause["level"], index), clause["keyword"], clause["content"], get_op_separator(res["operatives"], idx)))
         else:
             ops.append(u'<text:p text:style-name="ops-%d">%s. <text:span text:style-name="clause_body">%s%s</text:span></text:p>' % (clause["level"], get_level_index(clause["level"], index), clause["content"], get_op_separator(res["operatives"], idx)))
@@ -49,8 +50,13 @@ def generate_document(res, lang, topic_name, committee_salutation_name, committe
     ops_outline = string.join(ops, u'\n')
     styles = u'<style:style style:family="text" style:name="clause_keyword"><style:text-properties fo:font-style="italic" style:font-name-complex="Times New Roman"/></style:style>\n<style:style style:family="text" style:name="clause_body"><style:text-properties fo:font-style="normal" style:font-name-complex="Times New Roman"/></style:style>\n<style:style style:family="paragraph" style:name="preams"><style:paragraph-properties fo:margin-left="0.5in" fo:margin-bottom="0.14in"/></style:style>'
     styles += string.join([u'<style:style style:family="paragraph" style:name="ops-%d"><style:paragraph-properties fo:margin-left="%fin" fo:margin-bottom="0.14in"/></style:style>' % (idx, 0.5 * (idx + 1)) for idx in range(max_level + 1)], u'\n')
+    if lang == ENGLISH:
+        sponsors = [{"name": s["englishName"], "longName": s["englishLongName"]} for s in sponsors]
+    elif lang == SPANISH:
+        sponsors = [{"name": s["spanishName"], "longName": s["spanishLongName"]} for s in sponsors]
 #FIXME: need two separate names for sponsors (one for sort order and one for full name) ???
-    countries = string.join(res["sponsors"], ', ')
+    names = [s["longName"] for s in sorted(sponsors, key=lambda d: d["name"])]
+    countries = string.join(names, ', ')
     tagline = u'%s/%s/%s%d' % (committee_abbr, toRoman(topic_index, True), get_str('DRAFT', lang) if isDraft else u'', res_index)
     templateValues = {
         'styles': styles,

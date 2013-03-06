@@ -4,12 +4,14 @@ import h_do_new
 import h_action
 import h_index
 import h_new
+import h_generate
 
 app = webapp2.WSGIApplication(
         [('/', h_index.IndexHandler),
          ('/action', h_action.ActionHandler),
          ('/do_new', h_do_new.DoNewHandler),
-         ('/new_resolution', h_new.NewHandler)],
+         ('/new_resolution', h_new.NewHandler),
+         ('/generate', h_generate.GenerateDocumentHandler)],
         debug=True)
 
 def main():

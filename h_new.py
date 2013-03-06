@@ -23,7 +23,8 @@ class NewHandler(ValidUserRequestHandler):
             self.response.out.write('<html><body><p>Internal error: no committee.</p></body></html>')
             return
         committee = dblayer.getCommitteeHusk(committeeId)
-        committeeOptions = '<option value="%d">%s</option>' % (committeeId, committee["abbreviation"])
+        abbr = committee["abbreviationEnglish"] if committee["language"] == ENGLISH else committee["abbreviationSpanish"]
+        committeeOptions = '<option value="%d">%s</option>' % (committeeId, abbr)
         topics = dblayer.getCommitteeTopics(committeeId)
         indexOptions = {tup[2]: self.getTopicIndexOptions(tup[2], committeeId) for tup in topics}
         indexOptionsStr = json.dumps(indexOptions)

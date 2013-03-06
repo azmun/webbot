@@ -31,7 +31,6 @@ def _getNewButton(committee):
 
 class IndexHandler(ValidUserRequestHandler):
     def getWithUser(self):
-        pdb.set_trace()
         gvJson = json.dumps(_getGeneratedValues(self.wbUser))
         enumsJson = json.dumps(Enums.All)
         nic = ''
