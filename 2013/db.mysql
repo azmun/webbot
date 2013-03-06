@@ -1,6 +1,6 @@
 USE webbot;
 
-INSERT INTO Committees (id, language, abbreviation, displayNameEnglish, displayNameSpanish) VALUES (1, 0, 'GA3', 'The General Assembly', NULL), (2, 2, 'SC', 'The Security Council', 'El Consejo de Seguridad');
+INSERT INTO Committees (id, language, abbreviationEnglish, displayNameEnglish, displayNameSpanish) VALUES (1, 0, 'GA3', 'The General Assembly', NULL), (2, 2, 'SC', 'The Security Council', 'El Consejo de Seguridad');
 
 INSERT INTO Users (fullName, email, role, committeeId, language) VALUES ('Elizabeth Porter', 'elizabethporter@email.arizona.edu', 0, 1, 0), ('Joice Hildenbrand', 'jnhildenbrand@email.arizona.edu', 1, NULL, 0), ('Brennan Vincent', 'brennanv@email.arizona.edu', 2, NULL, 0);
 

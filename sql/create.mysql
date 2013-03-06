@@ -3,7 +3,8 @@ CREATE DATABASE webbot;
 USE webbot;
 CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	language INT NOT NULL,
-    abbreviation VARCHAR(5) NOT NULL,
+    	abbreviationEnglish VARCHAR(5) NOT NULL,
+	abbreviationSpanish VARCHAR(5) NOT NULL,
 	displayNameEnglish VARCHAR(255),
 	displayNameSpanish VARCHAR(255));
 
