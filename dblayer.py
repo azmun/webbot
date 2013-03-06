@@ -90,11 +90,11 @@ def getCommitteeLanguage(committeeId):
 
 def getResolutionInfo(resolutionId):
     cursor = _getCursor()
-    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index`, comments, originalAssigneeId, assigneeId FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id WHERE Resolutions.id=%s", resolutionId)
+    cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index`, comments, originalAssigneeId, assigneeId, abbreviationEnglish, abbreviationSpanish FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE Resolutions.id=%s", resolutionId)
     row = cursor.fetchone()
     if not row:
         raise NoSuchResolutionError()
-    ret = ResolutionInfo(ownerId = row[0], englishResolution = None if row[1] == None else json.loads(row[1]), spanishResolution = None if row[2] == None else json.loads(row[2]), committeeId = row[3], status = row[4], index = row[5], topic = row[6], comments = row[7], originalAssigneeId = row[8], resolutionId = resolutionId, assigneeId = row[9])
+    ret = ResolutionInfo(ownerId = row[0], englishResolution = None if row[1] == None else json.loads(row[1]), spanishResolution = None if row[2] == None else json.loads(row[2]), committeeId = row[3], status = row[4], index = row[5], topic = row[6], comments = row[7], originalAssigneeId = row[8], resolutionId = resolutionId, assigneeId = row[9], committeeAbbreviationEnglish = row[10], committeeAbbreviationSpanish = row[11])
     cursor.execute("SELECT englishName, spanishName, englishLongName, spanishLongName FROM Countries INNER JOIN ResolutionSponsors ON Countries.id = ResolutionSponsors.countryId WHERE ResolutionSponsors.resolutionId = %s", resolutionId)
     ret["sponsors"] = []
     for row in cursor.fetchall():
