@@ -166,7 +166,7 @@ function bindOperative(i, elt)
 
 function getPreambularToAdd(index, keyword, content)
 {
-	var toAdd = $('<p class="preambular"><input type="button" class="insertBeforeButton" value="Insert new clause here"></input><input type="text" class="keyword" style="width:50px"></input><input type="text" class="content" style="width:200px"></input><input type="button" class="deleteButton" value="Delete clause"></input></p>');
+	var toAdd = $('<div class="preambular"><input type="button" class="insertBeforeButton" value="Insert new clause here"></input><input type="text" class="keyword" style="width:100px"></input><textarea class="content" rows="6" cols="30"></textarea><input type="button" class="deleteButton" value="Delete clause"></input></div>');
 	toAdd.find(".keyword").val(keyword);
 	toAdd.find(".content").val(content);
 	bindPreambular(index, toAdd);
@@ -175,14 +175,14 @@ function getPreambularToAdd(index, keyword, content)
 
 function getOperativeToAdd(index, level, keyword, content)
 {
-	var toAdd = $('<p class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here"></input><input type="text" class="content" style="width:200px"></input><input type="button" class="newSubclauseButton" value="Add new subclause"></input><input type="button" class="deleteButton" value="Delete clause (and all subclauses")></input></p>');
+	var toAdd = $('<div class="operative"><input type="button" class="insertBeforeButton" value="Insert new clause here"></input><textarea class="content" rows="6" cols="30" ></textarea><input type="button" class="newSubclauseButton" value="Add new subclause"></input><input type="button" class="deleteButton" value="Delete clause (and all subclauses")></input></div>');
 	toAdd.data('level', level);
 	toAdd.css('margin-left', level * 10);
 	var contentElement = toAdd.find('.content');
 	contentElement.val(content);
 	if (level == 0)
 	{
-		contentElement.before($('<input type="text" class="keyword" style="width:50px"></input>').val(keyword));
+		contentElement.before($('<input type="text" class="keyword" style="width:100px"></input>').val(keyword));
 	}
 	bindOperative(index, toAdd);
 	return toAdd;
