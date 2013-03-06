@@ -380,8 +380,16 @@ function removeResolution()
 
 function getResolutionTag(res)
 {
-    //FIXME
-    return "" + res.topic + "/" + res.index;
+    //FIXME: Bilingual
+    if (getLang(res) == ENGLISH)
+    {
+        return res["englishTag"];
+    }
+    else
+    {
+        return res["spanishTag"];
+    }
+    //lol 2 ez
 }
 
 function buildResolutionsTree(resolutions, order, howManyLevels)
@@ -418,8 +426,17 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
         }
         for (var j = c; j < howManyLevels; ++j)
         {
+            var titleValue;
+            if (order[j] in window.reverseEnums)
+            {
+                titleValue = window.reverseEnums[order[j]][res[order[j]]];
+            }
+            else
+            {
+                titleValue = res[order[j]];
+            }
             // make a new item based on order[j] and add it to levelParents[j]
-            var item = {"title": order[j] + ": " + res[order[j]], "children": [], "isFolder": true};
+            var item = {"title": order[j] + ": " + titleValue, "children": [], "isFolder": true};
             levelParents[j].push(item);
             // set levelParents[j+1] to that item
             levelParents[j + 1] = item.children;

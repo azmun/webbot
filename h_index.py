@@ -33,6 +33,7 @@ class IndexHandler(ValidUserRequestHandler):
     def getWithUser(self):
         gvJson = json.dumps(_getGeneratedValues(self.wbUser))
         enumsJson = json.dumps(Enums.All)
+        reverseEnumsJson = json.dumps(Enums.Reverse)
         nic = ''
         committee = self.wbUser.canCreateResolutionIn()
         if committee != None:
@@ -40,6 +41,7 @@ class IndexHandler(ValidUserRequestHandler):
         templateValues = {
             'dynamicGlobals': gvJson,
             'enumValues': enumsJson,
+            'reverseEnumValues': reverseEnumsJson,
             'newIfCan': nic
         }
         path = os.path.join(os.path.dirname(__file__), 'resolution.html')

@@ -78,7 +78,7 @@ def getTopicAndCommitteeInfo(topicId):
     row = cursor.fetchone()
     if not row:
         raise NoSuchTopicError()
-    return {"topicIndex": row[0], "committeeAbbreviationEnglish": row[1], "committeeAbbreviationSpanish": row[2], "committeeDisplayNameEnglish": row[3], "committeeDisplayNameSpanish": row[4], "topicEnglishName": row[5], "topicSpanishName": row[6]}
+    return {"topic": row[0], "committeeAbbreviationEnglish": row[1], "committeeAbbreviationSpanish": row[2], "committeeDisplayNameEnglish": row[3], "committeeDisplayNameSpanish": row[4], "topicEnglishName": row[5], "topicSpanishName": row[6]}
 
 def getCommitteeLanguage(committeeId):
     cursor = _getCursor()
@@ -105,7 +105,7 @@ def getUserResolutions(user):
     filt = user.getConcernedResolutionsFilter()
     whereString = string.join([_getFilterString(t) for t in filt], " AND ")
     orderString = string.join(["`%s`" % s for s in user.getConcernedResolutionsOrder()], ", ")
-    queryString = "SELECT ownerId, Resolutions.id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index` AS topicIndex, assigneeId, comments, originalAssigneeId FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id WHERE " + whereString + " ORDER BY " + orderString
+    queryString = "SELECT ownerId, Resolutions.id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index` AS topic, assigneeId, comments, originalAssigneeId, abbreviationEnglish, abbreviationSpanish FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE " + whereString + " ORDER BY " + orderString
     params = Utils.shallowFlatten([t[2] for t in filt])
     cursor = _getCursor()
     if len(params):
@@ -113,7 +113,7 @@ def getUserResolutions(user):
         cursor.execute(queryString, params)
     else:
         cursor.execute(queryString)
-    ret = [ResolutionInfo(ownerId = row[0], resolutionId = row[1], englishResolution = None if row[2] == None else json.loads(row[2]), spanishResolution = None if row[3] == None else json.loads(row[3]), committeeId = row[4], status = row[5], index = row[6], topic = row[7], assigneeId = row[8], comments = row[9], originalAssigneeId = row[10]) for row in cursor.fetchall()]
+    ret = [ResolutionInfo(ownerId = row[0], resolutionId = row[1], englishResolution = None if row[2] == None else json.loads(row[2]), spanishResolution = None if row[3] == None else json.loads(row[3]), committeeId = row[4], status = row[5], index = row[6], topic = row[7], assigneeId = row[8], comments = row[9], originalAssigneeId = row[10], committeeAbbreviationEnglish = row[11], committeeAbbreviationSpanish = row[12]) for row in cursor.fetchall()]
     logging.info("Found %d concerned resolutions for user %s." % (len(ret), user._fullName))
     return ret
     

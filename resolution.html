@@ -10,6 +10,7 @@
         <script type="text/javascript">
             var dg = {{dynamicGlobals|safe}}
             var ev = {{enumValues|safe}}
+            var rev = {{reverseEnumValues|safe}}
             for (x in dg)
             {
                 if (dg.hasOwnProperty(x))
@@ -22,6 +23,14 @@
                 if (ev.hasOwnProperty(x))
                 {
                     window[x] = ev[x];
+                }
+            }
+            window["reverseEnums"] = {};
+            for (x in rev)
+            {
+                if (rev.hasOwnProperty(x))
+                {
+                    window["reverseEnums"][x] = rev[x];
                 }
             }
         </script>
