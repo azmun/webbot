@@ -230,6 +230,7 @@ def getCommitteeUsedIndices(committeeId, topic):
     return ret
 
 def save(ri):
+    pdb.set_trace()
     cursor = _getCursor()
     cursor.execute("SELECT id FROM CommitteeTopics WHERE committeeId=%s AND `index`=%s", (ri["committeeId"], ri["topic"]))
     topicRow = cursor.fetchone()
@@ -238,7 +239,7 @@ def save(ri):
     topicId = topicRow[0]
     sl = ri["selectedLanguage"] if "selectedLanguage" in ri else None
     if (ri["resolutionId"] != None):
-        cursor.execute("UPDATE Resolutions SET ownerId=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, topicId=%s, status=%s, `index`=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s, selectedLanguage=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), topicId, ri["status"], ri["index"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], ri["resolutionId"], sl))
+        cursor.execute("UPDATE Resolutions SET ownerId=%s, serializedResolutionObjectEnglish=%s, serializedResolutionObjectSpanish=%s, topicId=%s, status=%s, `index`=%s, assigneeId=%s, originalAssigneeId=%s, comments=%s, selectedLanguage=%s WHERE id=%s", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), topicId, ri["status"], ri["index"], ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], sl, ri["resolutionId"]))
     else:
         cursor.execute("INSERT INTO Resolutions (ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, status, `index`, topicId, assigneeId, originalAssigneeId, comments, selectedLanguage) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (ri["ownerId"], json.dumps(ri["englishResolution"]), json.dumps(ri["spanishResolution"]), ri["status"], ri["index"], topicId, ri["assigneeId"], ri["originalAssigneeId"], ri["comments"], sl))
         ri["resolutionId"] = cursor.lastrowid
