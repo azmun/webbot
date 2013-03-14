@@ -537,7 +537,8 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
             levelParents[j + 1] = item.children;
         }
         // now add the res tag to the highest levelParents.
-        levelParents[levelParents.length - 1].push({"title": getResolutionTag(res), "resolution": res});
+        var lang = getLang(res);
+        levelParents[levelParents.length - 1].push({"title": getResolutionTag(res, lang == BILINGUAL ? SPANISH : lang), "resolution": res});
         
         // make currentLevelElements[x] be resolutions[order[x]] for each x
         for (var x = 0; x < howManyLevels; ++x)
