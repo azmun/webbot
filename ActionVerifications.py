@@ -1,4 +1,6 @@
-(VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE, VERIFY_USER_SURE_AND_ADDED_COMMENTS, VERIFY_RESOLUTIONS_MATCH, YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS) = range(5)
+from languages import *
+import dblayer
+(VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE, VERIFY_USER_SURE_AND_ADDED_COMMENTS, VERIFY_RESOLUTIONS_MATCH, YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS, VERIFY_ONLY_ONE_IF_BILINGUAL) = range(6)
 
 def _verifyResolutionsMatch(ri):
     if not ("englishResolution" in ri and "spanishResolution" in ri):
@@ -11,6 +13,34 @@ def _verifyResolutionsMatch(ri):
     for ec, sc in zip(eng["operatives"], span["operatives"]):
         if ec["level"] != sc["level"]:
             return False
+    return True
+
+def _clausesFull(ri, lang):
+    if lang == ENGLISH:
+        if not "englishResolution" in ri:
+            return False
+        loc = ri["englishResolution"]
+    elif lang == SPANISH:
+        if not "spanishResolution" in ri:
+            return False
+        loc = ri["spanishResolution"]
+    if (not loc) or (not "preambulars" in loc) or (not "operatives" in loc) or (not loc["preambulars"]) or (not loc["operatives"]):
+        return False
+    return True
+
+def _verifyResolutionFull(ri):
+    lang = dblayer.getCommitteeLanguage(ri["committeeId"])
+    if lang == BILINGUAL:
+        if not (_clausesFull(ri, SPANISH) or _clausesFull(ri, ENGLISH)):
+            return False
+    elif lang == ENGLISH:
+        if not _clausesFull(ri, ENGLISH):
+            return False
+    elif lang == SPANISH:
+        if not _clausesFull(ri, SPANISH):
+            return False
+    if not "sponsors" in ri or not ri["sponsors"]:
+        return False
     return True
 
 ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
@@ -35,8 +65,7 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
               }
               return true;
             }""",
-            #FIXME
-            "python": lambda ri: True},
+            "python": _verifyResolutionFull},
     {"verificationID": VERIFY_USER_SURE,
         "js": r"""function ()
             {
