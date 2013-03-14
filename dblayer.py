@@ -166,7 +166,7 @@ def getAllCommittees():
         elif lang == SPANISH and spanishName:
             ci["topics"].append(spanishName)
         elif lang == BILINGUAL and englishName and spanishName:
-            ci["topics"].append(englishName, spanishName)
+            ci["topics"].append((englishName, spanishName))
     return ret
 
 
