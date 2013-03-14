@@ -6,11 +6,12 @@ ActionDialogs = [{"dialogID": PICK_RP,
             var answer;
             promptStr = "";
             //FIXME
-            if (getLang(res) == ENGLISH)
+            var lang = getActualLang(res);
+            if (lang === ENGLISH)
             {
                 var RPs = englishRPs;
             }
-            else
+            else if (lang === SPANISH)
             {
                 var RPs = spanishRPs
             }

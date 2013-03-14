@@ -130,12 +130,12 @@ def getUserResolutions(user):
     
 def getEnglishRPs():
     cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s", (ENGLISH,))
+    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (ENGLISH, User.RP_ROLE, User.RPC_ROLE))
     return [User.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
 
 def getSpanishRPs():
     cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s", (SPANISH,))
+    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (SPANISH, User.RP_ROLE, User.RPC_ROLE))
     return [User.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
 
 def getAllCommittees():
