@@ -25,6 +25,10 @@ ActionDialogs = [{"dialogID": PICK_RP,
             while (true)
             {
                 answer = prompt(promptStr);
+                if (answer === null)
+                {
+                    return {'param': null, 'OK': false};
+                }
                 if (!(answer == "" || isNaN(answer)) && answer % 1 === 0)
                 {
                     if (+answer >= 0 && +answer < RPs.length)
