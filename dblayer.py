@@ -54,7 +54,7 @@ def _getFilterString(tup):
     if op == Filt.EQ:
         return field + "<=>%s"
     if op == Filt.IN:
-        return "`%s` IN (" % field + string.join(["%s"] * len(val), ", ") +")"
+        return '(' + string.join([field + "<=>%s"] * len(val), ' OR ') + ')'
 
 def getRPC_ID(lang):
     if lang == BILINGUAL:
