@@ -77,6 +77,7 @@ function sendActionMessage(res, action, param)
     toSend["comments"] = res.comments;
     toSend["action"] = action;
     toSend["param"] = param;
+    toSend["sponsors"] = res.sponsors;
     $.post('/action', JSON.stringify(toSend), function(data) {
        if (! data.Success) {
            alert("An error has occurred! Please tell conference services.\nError: " + data.Error);
@@ -277,10 +278,9 @@ function deleteOperative(index)
 	});
 }
 
-function getPossibleSponsorsByCommittee(committeeId)
+function getPossibleSponsorsByCommittee(committeeId, lang)
 {
-	//FIXME: fake.
-	return ["Bahrain", "USA", "UK", "Russian Federation", "France", "India", "Québec", "Spain"];
+    return committees[committeeId].countries;
 }
 
 function populateResolution(resolution)
@@ -296,6 +296,11 @@ function populateResolution(resolution)
         localizedRes = resolution.spanishResolution;
     }
 	window.currentRes = resolution;
+        $("#generateFormattedVersion").off("click").on("click", function() {
+            var resolution = window.currentRes;
+            window.location.href = "/generate?id=" + resolution.resolutionId + "&language=" + getLang(resolution);
+        });
+        $("#generateFormattedVersion").removeAttr("disabled");
 	$("#preambulars").empty();
 	$("#operatives").empty();
     $("#sponsors").empty();
@@ -324,9 +329,19 @@ function populateResolution(resolution)
 		$("#operatives").append(toAdd);
 	}
 	$("#operatives").append($('<input type="button" id="newOperativeClauseButton" value="Add new operative clause"></input>').click(_bind(-1, newOperativeIn)));
-	var sponsors = resolution.sponsors
+	var sponsorIds = $.map(resolution.sponsors, function (val) {
+            return val.id;
+        });
 	var possibleSponsors = getPossibleSponsorsByCommittee(resolution.committeeId);
-	possibleSponsors.sort();
+        //FIXME: Bilingual
+        var lang = getLang(resolution);
+	possibleSponsors.sort(function(a, b) {
+            if (lang == ENGLISH || lang == BILINGUAL)
+            {
+                return a["englishName"] > b["englishName"];
+            }
+            return a["spanishName"] > b["spanishName"];
+        });
 	if (!possibleSponsors || !(possibleSponsors.length))
 	{
 		_fuckup("No possible sponsors found in committee: " + resolution.committeeId);
@@ -334,13 +349,24 @@ function populateResolution(resolution)
 	}
 	for (var i = 0; i < possibleSponsors.length; ++i)
 	{
+                var sponsorName;
+                //FIXME: Bilingual
+                if (lang == ENGLISH || lang == BILINGUAL)
+                {
+                       sponsorName = possibleSponsors[i].englishName;
+                }
+                else
+                {
+                       sponsorName = possibleSponsors[i].spanishName; 
+                }
 		var checkbox = $('<input class="sponsor" type="checkbox"></input>').data("country", possibleSponsors[i]);
-		if ($.inArray(possibleSponsors[i], sponsors) != -1)
+		if ($.inArray(possibleSponsors[i].id, sponsorIds) != -1)
 		{
 			checkbox.attr("checked", "checked");
 		}
 		$("#sponsors").append(checkbox);
-		$("#sponsors").append(possibleSponsors[i]);
+
+		$("#sponsors").append(sponsorName);
 		$("#sponsors").append("<br />");
 	}
 	$("#comments").removeAttr("disabled");
@@ -371,6 +397,7 @@ function newResolution(committee)
 function removeResolution()
 {
 	window.currentRes = null;
+        $("#generateFormattedVersion").attr("disabled", "disabled");
 	$("#preambulars").html("<p>No resolution selected.</p>");
 	$("#operatives").empty();
 	$("#sponsors").empty();

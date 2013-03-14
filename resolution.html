@@ -45,10 +45,19 @@
 	</head>
 	<body>
 		<div id="container">
-			<div id="menu" style="width:300px;float:left;">
+                    <div style="width:300px;float:left;">
+                        <div>
+                    {{newIfCan|safe}}
+                        </div>
+                        <div>
+                            <a href="{{logout|safe}}">logout</a>
+                        </div>
+                        <div id="menu">
 				<p>No resolutions yet.</p>
 			</div>
+                    </div>
 			<div id="content" style="float:left;">
+                            <input type="button" id="generateFormattedVersion" value="Generate formatted version" disabled></input>
 				<div id="clauses">
 					<div id="preambulars">
 						<p>No resolution selected.</p>
@@ -64,7 +73,6 @@
                     </textarea>
 				</div>
 				<div id="actions">
-                    {{newIfCan|safe}}
 				</div>
 			</div>
 		</div>

@@ -1,5 +1,6 @@
 import webapp2
 from google.appengine.ext.webapp import template
+from google.appengine.api import users
 import dblayer
 import json
 from ActionVerifications import ActionVerifications
@@ -42,7 +43,8 @@ class IndexHandler(ValidUserRequestHandler):
             'dynamicGlobals': gvJson,
             'enumValues': enumsJson,
             'reverseEnumValues': reverseEnumsJson,
-            'newIfCan': nic
+            'newIfCan': nic,
+            'logout': users.create_logout_url('/')
         }
         path = os.path.join(os.path.dirname(__file__), 'resolution.html')
         self.response.out.write(template.render(path, templateValues))
