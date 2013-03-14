@@ -1,5 +1,18 @@
 (VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE, VERIFY_USER_SURE_AND_ADDED_COMMENTS, VERIFY_RESOLUTIONS_MATCH, YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS) = range(5)
 
+def _verifyResolutionsMatch(ri):
+    if not ("englishResolution" in ri and "spanishResolution" in ri):
+        return False
+    (eng, span) = (ri["englishResolution"], ri["spanishResolution"])
+    if not len(eng["preambulars"]) == len(span["preambulars"]):
+        return False
+    if not len(eng["operatives"]) == len(span["operatives"]):
+        return False
+    for ec, sc in zip(eng["operatives"], span["operatives"]):
+        if ec["level"] != sc["level"]:
+            return False
+    return True
+
 ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
     "js": r"""function ()
             {
@@ -44,7 +57,37 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
               return confirm("Are you sure you want to perform this action? Please verify that you entered everything correctly.");
             }""",
             "python": lambda ri: bool(ri["comments"])},
-    {"verificationID": VERIFY_RESOLUTIONS_MATCH, "js": "function () { return true; }", "python": lambda ri: True},
+    {"verificationID": VERIFY_RESOLUTIONS_MATCH, 
+        "js": r"""function ()
+        {
+            var cr = window.currentRes;
+            var eng = cr.englishResolution;
+            var span = cr.spanishResolution;
+            if (!eng || !span)
+            {
+                _fuckup("VERIFY_RESOLUTIONS_MATCH called but both languages don't exist.");
+                return false;
+            }
+            if (eng.preambulars.length != span.preambulars.length)
+            {
+                alert("The translation is not correct: one version has more preambular clauses than the other.");
+                return false;
+            }
+            if (eng.operatives.length != span.operatives.length)
+            {
+                alert("The translation is not correct: one version has more operative clauses than the other.");
+                return false;
+            }
+            for (var i = 0; i < eng.operatives.length; ++i)
+            {
+                if (eng.operatives[i].level != span.operatives[i].level)
+                {
+                    alert("The translation is not correct: operative clause " + (i + 1) + " is at a different subclause level.");
+                    return false;
+                }
+            }
+            return true;
+        }""", "python": _verifyResolutionsMatch },
     {"verificationID": YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
         "js": r"""function ()
             {
