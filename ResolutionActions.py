@@ -65,7 +65,7 @@ def rejectDraft(ri, unused):
 
 def translationFinished(ri, unused):
     ri["status"] = ACCEPTED_DRAFT_WAITING_FOR_PRINTING
-    ri["assigneeId"] = ri["originalAssigneeId"]
+    ri["assigneeId"] = None
     ri["ownerId"] = dblayer.getRPC_ID(dblayer.getCommitteeLanguage(ri["committeeId"]))
     dblayer.save(ri)
     comm.push(ri, ri["ownerId"])
