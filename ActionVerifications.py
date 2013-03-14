@@ -117,6 +117,24 @@ ActionVerifications = [{"verificationID": VERIFY_FULL_RESOLUTION,
             }
             return true;
         }""", "python": _verifyResolutionsMatch },
+    {"verificationID": VERIFY_ONLY_ONE_IF_BILINGUAL,
+        "js": r"""function()
+            {
+                var cr = window.currentRes;
+                if (getLang(cr) == BILINGUAL)
+                {
+                    var test = function(loc) { if (!loc) return true; return loc.operatives.length == 0 && loc.preambulars.length == 0; };
+                    var ret = test(cr.englishResolution) || test(cr.spanishResolution);
+                    if (!ret)
+                    {
+                        alert("You have entered clauses in both English and Spanish. Please only fill in one and let Conference Services headquarters handle the translation.");
+                    }
+                    return ret;
+                }
+                return true;
+            }""",
+            #FIXME
+            "python": lambda ri: True},
     {"verificationID": YOU_HAD_BETTER_BE_REAL_FUCKING_SURE_ABOUT_THIS,
         "js": r"""function ()
             {

@@ -75,8 +75,8 @@ class Rapporteur(User):
 
     def getResolutionActions(self, status):
         if status == NEW_DRAFT or status == RETURNED_DRAFT:
-            return [ActionInfo(actionID = SAVE_RESOLUTION, displayName = "Save", actionFunc = saveResolution, dialog = None, verifications = [], expectToKeep = True),
-                    ActionInfo(actionID = SUBMIT_RESOLUTION, displayName = "Submit", actionFunc = submitResolution, dialog = None, verifications = [VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE], expectToKeep = False),
+            return [ActionInfo(actionID = SAVE_RESOLUTION, displayName = "Save", actionFunc = saveResolution, dialog = None, verifications = [VERIFY_ONLY_ONE_IF_BILINGUAL], expectToKeep = True),
+                    ActionInfo(actionID = SUBMIT_RESOLUTION, displayName = "Submit", actionFunc = submitResolution, dialog = None, verifications = [VERIFY_ONLY_ONE_IF_BILINGUAL, VERIFY_FULL_RESOLUTION, VERIFY_USER_SURE], expectToKeep = False),
                     ActionInfo(actionID = DELETE_RESOLUTION, displayName = "Delete", actionFunc = deleteResolution, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False)]
         if status == PRINTED_DRAFT:
             return [ActionInfo(actionID = RESOLUTION_PASSED, displayName = "Resolution Passed", actionFunc = resolutionPassed, dialog = None, verifications = [VERIFY_NO_OUTSTANDING_AMENDMENTS, VERIFY_USER_SURE], expectToKeep = False),
