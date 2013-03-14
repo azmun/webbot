@@ -73,6 +73,7 @@ function sendActionMessage(res, action, param)
     toSend["action"] = action;
     toSend["param"] = param;
     toSend["sponsors"] = res.sponsors;
+    toSend["selectedLanguage"] = getActualLang(res);
     $.post('/action', JSON.stringify(toSend), function(data) {
        if (! data.Success) {
            alert("An error has occurred! Please tell conference services.\nError: " + data.Error);
@@ -317,25 +318,39 @@ function getLocalizedRes(res)
 function populateResolution(resolution)
 {
     var lang = getLang(resolution);
-    var actualLang;
+    var actualLang = null;
+    var dis;
     if (lang == BILINGUAL)
     {
-        $('#languageChoice input[name=language]').each(function() {
-            $(this).removeAttr('disabled');
-        });
-        actualLang = getCheckedLanguage();
+        if ('selectedLanguage' in resolution)
+        {
+            actualLang = resolution.selectedLanguage;
+        }
+        if (actualLang === null)
+        {
+            actualLang = getCheckedLanguage();
+        }
+        dis = false;
     }
     else
     {
-        $('#languageChoice input[name=language]').each(function() {
-            $(this).attr('disabled', 'disabled');
-            if (Number($(this).val() === lang))
-            {
-                $(this).attr('checked', 'checked');
-            }
-        });
+        dis = true;
         actualLang = lang;
     }
+    $('#languageChoice input[name=language]').each(function() {
+        if (dis)
+        {
+            $(this).attr('disabled', 'disabled');
+        }
+        else
+        {
+            $(this).removeAttr('disabled');
+        }
+        if (Number($(this).val()) === actualLang)
+        {
+            $(this).attr('checked', 'checked');
+        }
+    });
     var localizedRes;
     if (actualLang == ENGLISH)
     {

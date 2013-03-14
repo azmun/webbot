@@ -32,6 +32,8 @@ class ActionHandler(ValidUserJSONHandler):
             ri['englishResolution'] = rco['englishResolution']
         ri['comments'] = rco['comments']
         ri['sponsors'] = rco['sponsors']
+        if 'selectedLanguage' in rco:
+            ri['selectedLanguage'] = rco['selectedLanguage']
         return ri
     def postWithUser(self):
         try:
