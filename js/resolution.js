@@ -291,21 +291,19 @@ function languageChanged(lang)
     populateResolution(window.currentRes);
 }
 
-function getLocalizedRes(res)
+function getActualLang(res)
 {
     lang = getLang(res);
-    if (lang === BILINGUAL)
+    if (lang !== BILINGUAL)
     {
-        actualLang = getCheckedLanguage();
-        if (actualLang === ENGLISH)
-        {
-            return res.englishResolution;
-        }
-        if (actualLang === SPANISH)
-        {
-            return res.spanishResolution;
-        }
+        return lang;
     }
+    return getCheckedLanguage();
+}
+
+function getLocalizedRes(res)
+{
+    lang = getActualLang(res);
     if (lang === ENGLISH)
     {
         return res.englishResolution;
