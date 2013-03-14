@@ -72,9 +72,9 @@ def getCommitteeRapporteurID(committeeId):
         raise NoSuchUserError()
     return row[0]
 
-def getTopicAndCommitteeInfo(topicId):
+def getTopicAndCommitteeInfo(topicIndex, committeeId):
     cursor = _getCursor()
-    cursor.execute("SELECT `index`, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, englishName, spanishName FROM CommitteeTopics INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE CommitteeTopics.id=%s", topicId)
+    cursor.execute("SELECT `index`, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, englishName, spanishName FROM CommitteeTopics INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE Committees.id=%s AND CommitteeTopics.`index`=%s", (committeeId, topicIndex))
     row = cursor.fetchone()
     if not row:
         raise NoSuchTopicError()

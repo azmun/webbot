@@ -1,11 +1,13 @@
 from ValidUserRequestHandler import ValidUserRequestHandler
 import dblayer
 import logging
+import pdb
 
 class DoNewHandler(ValidUserRequestHandler):
     def writeCommitteeFail(self):
         self.writeError('No valid committee selected.')
     def postWithUser(self):
+        pdb.set_trace()
         committeeIdStr = self.request.get("committee")
         indexStr = self.request.get("index")
         topicStr = self.request.get("topic")
