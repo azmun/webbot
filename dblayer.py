@@ -113,6 +113,7 @@ def getUserResolutions(user):
     cursor = _getCursor()
     if len(params):
         logging.info("In getUserResolutions; executing cursor with queryString: %s" % queryString)
+        logging.info("Params: %s" % params)
         cursor.execute(queryString, params)
     else:
         cursor.execute(queryString)

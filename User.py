@@ -113,7 +113,7 @@ class RPC(User):
         User.__init__(self, uId, fullName)
 
     def getConcernedResolutionsFilter(self):
-        return [("assigneeId", Filt.EQ, None),
+        return [("assigneeId", Filt.IN, [None, self._uId]),
                 ("status", Filt.IN, [DRAFT_BEING_PROCESSED, ACCEPTED_DRAFT_WAITING_FOR_PRINTING,
             ACCEPTED_DRAFT_BEING_TRANSLATED, PASSED_RESOLUTION_WAITING_FOR_PRINTING, SERIOUS_WTF])]
 
