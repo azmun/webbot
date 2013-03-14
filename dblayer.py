@@ -225,6 +225,7 @@ def getCommitteeUsedIndices(committeeId, topic):
     return ret
 
 def save(ri):
+    pdb.set_trace()
     cursor = _getCursor()
     cursor.execute("SELECT id FROM CommitteeTopics WHERE committeeId=%s AND `index`=%s", (ri["committeeId"], ri["topic"]))
     topicRow = cursor.fetchone()

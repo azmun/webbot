@@ -14,20 +14,22 @@ function isInt(value)
     return ( er.test(value) ) ? true : false;
 }
 
-function reconstructCurrentResolution()
+function reconstructCurrentResolution(lang)
 {
-	var cr = window.currentRes;
-	var newRes = {englishResolution: {preambulars: [], operatives: []}, spanishResolution: {preambulars: [], operatives: []}, committeeId: cr.committeeId, resolutionId: cr.resolutionId, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
-    var lang = getLang(cr);
-    //FIXME: bilingual
+    var cr = window.currentRes;
+    var newRes = {englishResolution: {preambulars: [], operatives: []}, spanishResolution: {preambulars: [], operatives: []}, committeeId: cr.committeeId, resolutionId: cr.resolutionId, sponsors: [], index: cr.index, status: cr.status, comments: $("#comments").val()}
     var localizedRes;
-    if (lang == ENGLISH)
+    if (lang === ENGLISH)
     {
         localizedRes = newRes.englishResolution;
+        // Don't clobber the other one.
+        newRes.spanishResolution = cr.spanishResolution;
     }
-    else
+    else if (lang === SPANISH)
     {
-        localizedRes = newRes.spanishResolution
+        localizedRes = newRes.spanishResolution;
+        // Don't clobber the other one.
+        newRes.englishResolution = cr.englishResolution;
     }
 	$(".preambular").each(function ()
 			{
@@ -64,15 +66,8 @@ function getLang(res)
 function sendActionMessage(res, action, param)
 {
     var toSend = {};
-    if (getLang(res) == ENGLISH)
-    {
-        toSend["englishResolution"] = res.englishResolution;
-    }
-    //FIXME: BILINGUAL
-    else
-    {
-        toSend["spanishResolution"] = res.spanishResolution;
-    }
+    toSend["englishResolution"] = res.englishResolution;
+    toSend["spanishResolution"] = res.spanishResolution;
     toSend["id"] = res.resolutionId;
     toSend["comments"] = res.comments;
     toSend["action"] = action;
@@ -105,27 +100,19 @@ function forgetResolution(resolutionId)
 	}
 }
 
-function getLocalizedRes(resolution)
-{
-	//HUGE WTF FIXME
-	if (getLang(resolution) == ENGLISH)
-	{
-		return resolution.englishResolution;
-	}
-	else
-	{
-		return resolution.spanishResolution;
-	}
-}
-
 function buildFunc(str)
 {
 	return eval('function foo() { return ' + str + '; }; foo();');
 }
 
+function getCheckedLanguage()
+{
+    return Number($('#languageChoice input[name=language]:checked').val());
+}
+
 function performResolutionAction(action)
 {
-	reconstructCurrentResolution();
+	reconstructCurrentResolution(getCheckedLanguage());
 	for (var i = 0; i < action.verifications.length; ++i)
 	{
 		var f = buildFunc(_verifications[action.verifications[i]]);
@@ -283,22 +270,66 @@ function getPossibleSponsorsByCommittee(committeeId, lang)
     return committees[committeeId].countries;
 }
 
+function languageChanged(lang)
+{
+    if (getLang(window.currentRes) !== BILINGUAL)
+    {
+        return;
+    }
+    var oldLang;
+    if (lang === ENGLISH)
+    {
+        oldLang = SPANISH;
+    }
+    if (lang === SPANISH)
+    {
+        oldLang = ENGLISH;
+    }
+    // save any changes from the currently selected language
+    reconstructCurrentResolution(oldLang);
+    // populate the window with the new one
+    populateResolution(window.currentRes);
+}
+
 function populateResolution(resolution)
 {
-    //FIXME: Bilingual
-    var localizedRes;
-    if (getLang(resolution) == ENGLISH)
+    var lang = getLang(resolution);
+    var actualLang;
+    if (lang == BILINGUAL)
     {
-        localizedRes = resolution.englishResolution;
+        $('#languageChoice input[name=language]').each(function() {
+            $(this).removeAttr('disabled');
+        });
+        actualLang = getCheckedLanguage();
     }
     else
     {
+        $('#languageChoice input[name=language]').each(function() {
+            $(this).attr('disabled', 'disabled');
+            if (Number($(this).val() === lang))
+            {
+                $(this).attr('checked', 'checked');
+            }
+        });
+        actualLang = lang;
+    }
+    var localizedRes;
+    if (actualLang == ENGLISH)
+    {
+        localizedRes = resolution.englishResolution;
+    }
+    else if (actualLang == SPANISH)
+    {
         localizedRes = resolution.spanishResolution;
+    }
+    else
+    {
+        _fuckup("What is actual lang??");
     }
 	window.currentRes = resolution;
         $("#generateFormattedVersion").off("click").on("click", function() {
             var resolution = window.currentRes;
-            window.location.href = "/generate?id=" + resolution.resolutionId + "&language=" + getLang(resolution);
+            window.location.href = "/generate?id=" + resolution.resolutionId + "&language=" + actualLang;
         });
         $("#generateFormattedVersion").removeAttr("disabled");
 	$("#preambulars").empty();
@@ -333,14 +364,15 @@ function populateResolution(resolution)
             return val.id;
         });
 	var possibleSponsors = getPossibleSponsorsByCommittee(resolution.committeeId);
-        //FIXME: Bilingual
-        var lang = getLang(resolution);
 	possibleSponsors.sort(function(a, b) {
-            if (lang == ENGLISH || lang == BILINGUAL)
+            if (actualLang == ENGLISH)
             {
                 return a["englishName"] > b["englishName"];
             }
-            return a["spanishName"] > b["spanishName"];
+            if (actualLang == SPANISH)
+            {
+                return a["spanishName"] > b["spanishName"];
+            }
         });
 	if (!possibleSponsors || !(possibleSponsors.length))
 	{
@@ -350,12 +382,11 @@ function populateResolution(resolution)
 	for (var i = 0; i < possibleSponsors.length; ++i)
 	{
                 var sponsorName;
-                //FIXME: Bilingual
-                if (lang == ENGLISH || lang == BILINGUAL)
+                if (actualLang == ENGLISH)
                 {
                        sponsorName = possibleSponsors[i].englishName;
                 }
-                else
+                if (actualLang == SPANISH)
                 {
                        sponsorName = possibleSponsors[i].spanishName; 
                 }
@@ -405,14 +436,13 @@ function removeResolution()
 	$("#comments").attr("disabled", "disabled");
 }
 
-function getResolutionTag(res)
+function getResolutionTag(res, lang)
 {
-    //FIXME: Bilingual
-    if (getLang(res) == ENGLISH)
+    if (lang === ENGLISH)
     {
         return res["englishTag"];
     }
-    else
+    if (lang === SPANISH)
     {
         return res["spanishTag"];
     }
@@ -493,5 +523,8 @@ function rebuildTree()
 
 $(document).ready(function() {
 	rebuildTree();
+        $('#languageChoice input[name=language]').change(function () {
+            languageChanged(getCheckedLanguage());
+        });
 });
 
