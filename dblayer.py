@@ -57,6 +57,8 @@ def _getFilterString(tup):
         return "`%s` IN (" % field + string.join(["%s"] * len(val), ", ") +")"
 
 def getRPC_ID(lang):
+    if lang == BILINGUAL:
+        lang = SPANISH
     cursor = _getCursor()
     cursor.execute("SELECT id FROM Users WHERE role=%s AND language=%s", (User.RPC_ROLE, lang))
     row = cursor.fetchone()
