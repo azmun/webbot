@@ -15,7 +15,7 @@ import copy
 
 conn = None
 
-_INSTANCE_NAME = "arizonamun.org:webbot:data"
+_INSTANCE_NAME = "arizonamun.org:webbot:azmunrobot"
 
 class NoSuchUserError(Exception):
     pass
