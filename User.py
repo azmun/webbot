@@ -5,6 +5,7 @@ from ActionVerifications import *
 from languages import *
 import Filt
 import pdb
+import dblayer
 
 #FIXME: Should the RPC just handle finals?
 
@@ -48,6 +49,9 @@ class User:
     def canCreateResolutionIn(self):
         return None
 
+    def canCreateTopics(self):
+        return False
+
     def getCommittee(self):
         return None
 
@@ -82,6 +86,9 @@ class Rapporteur(User):
             return [ActionInfo(actionID = RESOLUTION_PASSED, displayName = "Resolution Passed", actionFunc = resolutionPassed, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False),
                     ActionInfo(actionID = RESOLUTION_FAILED, displayName = "Resolution Failed", actionFunc = resolutionFailed, dialog = None, verifications = [VERIFY_USER_SURE], expectToKeep = False)]
         return []
+
+    def canCreateTopics(self):
+        return dblayer.userDefinedTopics(self._committeeId)
 
 class ResolutionProcessor(User):
     def __init__(self, uId, fullName, language):

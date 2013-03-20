@@ -27,9 +27,13 @@ def _getGeneratedValues(user):
     return ret
 
 _newButton = r"""<input type="button" value="New resolution" onclick="newResolution(%s)" name="newResolution" />"""
+_newTopicButton = r"""<input type="button" value="New topic" onclick="newTopic(%s)" name="newTopic" />"""
 
 def _getNewButton(committee):
     return _newButton % committee
+
+def _getNewTopicButton(committee):
+    return _newTopicButton % committee
 
 class IndexHandler(ValidUserRequestHandler):
     def getWithUser(self):
@@ -40,6 +44,9 @@ class IndexHandler(ValidUserRequestHandler):
         committee = self.wbUser.canCreateResolutionIn()
         if committee != None:
             nic = _getNewButton(committee)
+        ntic = ''
+        if self.wbUser.canCreateTopics():
+            ntic = _getNewTopicButton(committee)
         token = channel.create_channel("%d" % self.wbUser._uId)
         templateValues = {
             'token': token,
@@ -47,6 +54,7 @@ class IndexHandler(ValidUserRequestHandler):
             'enumValues': enumsJson,
             'reverseEnumValues': reverseEnumsJson,
             'newIfCan': nic,
+            'newTopicIfCan': ntic,
             'logout': users.create_logout_url('/')
         }
         path = os.path.join(os.path.dirname(__file__), 'resolution.html')

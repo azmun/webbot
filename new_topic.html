@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <title>New topic</title>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js">
+		</script>
+        <script type="text/javascript">
+            currentTopics = {{currentTopics|safe}}
+            languageName = {{languageName|safe}}
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                    var eng = languageName == "ENGLISH" || languageName == "BILINGUAL";
+                    var spa = languageName == "SPANISH" || languageName == "BILINGUAL";
+                    if (eng)
+                    {
+                        $("#newTopicEnglish").removeAttr("disabled");
+                    }
+                    if (spa)
+                    {
+                        $("#newTopicSpanish").removeAttr("disabled");
+                    }
+                    $("#topics").empty();
+                    for (var i = 0; i < currentTopics.length; ++i)
+                    {
+                        var x = $("#topics").append("<p></p>");
+                        if (eng)
+                        {
+                            x.append(currentTopics[i]["index"] + ". " + currentTopics[i]["englishName"]);
+                        }
+                        if (eng && spa)
+                        {
+                            x.append("<br />");
+                        }
+                        if (spa)
+                        {
+                            x.append(currentTopics[i]["index"] + ". " + currentTopics[i]["spanishName"]);
+                        }
+                    }
+                    $(".newTopic").keyup(function() {
+                        var fail = (eng && !$("#newTopicEnglish").val()) || (spa && !$('#newTopicSpanish').val());
+                        if (fail)
+                        {
+                            $("#submit").attr("disabled", "disabled");
+                        }
+                        else
+                        {
+                            $("#submit").removeAttr("disabled");
+                        }
+                    });
+                });
+        </script>
+    </head>
+    <body>
+        <h1><a href="/">Done adding topics.</a></h1>
+        <h1>New Topic</h1>
+        <form action="/do_new_topic" method="post">
+            <div>New topic (English version): <textarea class="newTopic" name="newTopicEnglish" id="newTopicEnglish" rows="6" cols="30" style="vertical-align: top;" disabled></textarea></div>
+            <div>New topic (Spanish version): <textarea class="newTopic" name="newTopicSpanish" id="newTopicSpanish" rows="6" cols="30" style="vertical-align: top;" disabled></textarea></div>
+            <div><input id="submit" type="submit" value="Submit" disabled/></div>
+        </form>
+        <div id="topics"></div>
+    </body>
+</html>

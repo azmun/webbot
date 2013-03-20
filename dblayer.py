@@ -139,11 +139,16 @@ def getSpanishRPs():
     cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (SPANISH, User.RP_ROLE, User.RPC_ROLE))
     return [User.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
 
+def userDefinedTopics(committeeId):
+    cursor = _getCursor()
+    cursor.execute("SELECT userDefinedTopics FROM Committees WHERE id<=>%s", committeeId)
+    return cursor.fetchone()[0]
+
 def getAllCommittees():
     cursor = _getCursor()
 #FIXME
     cursor.execute("SELECT englishName, spanishName, englishLongName, spanishLongName, id FROM Countries");
-    countries = [{"englishName": row[0], "spanishName": row[1], "englishLongName": row[2], "spanishName": row[3], "id": row[4]} for row in cursor.fetchall()]
+    countries = [{"englishName": row[0], "spanishName": row[1], "englishLongName": row[2], "spanishLongName": row[3], "id": row[4]} for row in cursor.fetchall()]
     #cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviationEnglish, abbreviationSpanish, spanishName, englishName, Committees.id, Countries.id AS countryId FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
 #FIXME this is wrong
     cursor.execute("SELECT abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, language, id FROM Committees");
@@ -230,6 +235,10 @@ def createNewResolution(committeeId, index, topic, ownerId):
     cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, `status`, `index`, topicId, ownerId) VALUES (%s, %s, %s, %s, %s, %s)", (englishResString, spanishResString, NEW_DRAFT, index, topicId, ownerId))
     cursor.close()
     _commit()
+
+def createNextTopic(committeeId, english, spanish):
+    cursor = _getCursor()
+    cursor.execute("INSERT INTO CommitteeTopics (committeeId, `index`, spanishName, englishName) VALUES (%s, (SELECT IFNULL(MAX(`index`), 0) + 1 FROM (SELECT * FROM CommitteeTopics) as FuckMySQL WHERE committeeId=%s), %s, %s)", (committeeId, committeeId, spanish, english))
 
 def getCommitteeUsedIndices(committeeId, topic):
     cursor = _getCursor()

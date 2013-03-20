@@ -475,6 +475,11 @@ function newResolution(committee)
     window.location.replace("/new_resolution")
 }
 
+function newTopic(committee)
+{
+    window.location.replace("/new_topic")
+}
+
 function removeResolution()
 {
 	window.currentRes = null;

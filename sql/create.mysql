@@ -6,7 +6,8 @@ CREATE TABLE Committees (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     	abbreviationEnglish VARCHAR(5) NOT NULL,
 	abbreviationSpanish VARCHAR(5) NOT NULL,
 	displayNameEnglish VARCHAR(255),
-	displayNameSpanish VARCHAR(255));
+	displayNameSpanish VARCHAR(255),
+        userDefinedTopics BOOL NOT NULL);
 
 CREATE TABLE Users (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     fullName VARCHAR(255) NOT NULL,
