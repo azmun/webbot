@@ -41,7 +41,7 @@ def resolutionPassed(ri, unused):
     comm.push(ri, ri["ownerId"])
 
 def resolutionFailed(ri, unused):
-    ri["status"] = THE_DUSTBIN_OF_HISTORY
+    ri["status"] = FAILED_RESOLUTION
     ri["ownerId"] = None
     dblayer.save(ri)
 
