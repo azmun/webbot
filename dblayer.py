@@ -11,6 +11,7 @@ from ResolutionInfo import ResolutionInfo
 from ResolutionStatuses import *
 import Resolution
 import pdb
+import copy
 
 conn = None
 
@@ -140,12 +141,19 @@ def getSpanishRPs():
 
 def getAllCommittees():
     cursor = _getCursor()
-    cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviationEnglish, abbreviationSpanish, spanishName, englishName, Committees.id, Countries.id AS countryId FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+#FIXME
+    cursor.execute("SELECT englishName, spanishName, englishLongName, spanishLongName, id FROM Countries");
+    countries = [{"englishName": row[0], "spanishName": row[1], "englishLongName": row[2], "spanishName": row[3], "id": row[4]} for row in cursor.fetchall()]
+    #cursor.execute("SELECT language, displayNameEnglish, displayNameSpanish, abbreviationEnglish, abbreviationSpanish, spanishName, englishName, Committees.id, Countries.id AS countryId FROM Committees LEFT JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
+#FIXME this is wrong
+    cursor.execute("SELECT abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, language, id FROM Committees");
     ret = {}
     for row in cursor.fetchall():
-        (language, displayNameEnglish, displayNameSpanish, abbreviationEnglish,
-                abbreviationSpanish, spanishName, englishName, committeeId, countryId) = (row[0], row[1],
-                        row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+#        (language, displayNameEnglish, displayNameSpanish, abbreviationEnglish,
+#                abbreviationSpanish, spanishName, englishName, committeeId, countryId) = (row[0], row[1],
+#                        row[2], row[3], row[4], row[5], row[6], row[7], row[8])
+#FIXME: this is wrong
+        (abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, language, committeeId) = (row[0], row[1], row[2], row[3], row[4], row[5])
         if not committeeId in ret:
             if not language in (ENGLISH, SPANISH, BILINGUAL):
                 raise InvalidLanguageError()
@@ -154,13 +162,14 @@ def getAllCommittees():
                     "displayNameEnglish":
                     displayNameEnglish, "displayNameSpanish":
                     displayNameSpanish, "language": language, "countries": [], "topics": []}
-        ci = ret[committeeId]
-        if language == ENGLISH and englishName:
-            ci["countries"].append({"englishName": englishName, "id": countryId})
-        elif language == SPANISH and spanishName:
-            ci["countries"].append({"spanishName": spanishName, "id": countryId})
-        elif language == BILINGUAL and englishName and spanishName:
-            ci["countries"].append({"englishName": englishName, "spanishName": spanishName, "id": countryId})
+            ret[committeeId]["countries"] = copy.deepcopy(countries)
+#        ci = ret[committeeId]
+#        if language == ENGLISH and englishName:
+#            ci["countries"].append({"englishName": englishName, "id": countryId})
+#        elif language == SPANISH and spanishName:
+#            ci["countries"].append({"spanishName": spanishName, "id": countryId})
+#        elif language == BILINGUAL and englishName and spanishName:
+#            ci["countries"].append({"englishName": englishName, "spanishName": spanishName, "id": countryId})
     cursor.execute("SELECT abbreviationEnglish, abbreviationSpanish, englishName, spanishName, Committees.id FROM Committees INNER JOIN CommitteeCountries ON Committees.id = CommitteeCountries.committeeId INNER JOIN Countries ON Countries.id = CommitteeCountries.countryId")
     for row in cursor.fetchall():
         (abbreviationEnglish, abbreviationSpanish, englishName, spanishName, committeeId) = (row[0], row[1], row[2], row[3], row[4])

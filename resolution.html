@@ -7,10 +7,17 @@
         </script>
         <script type="text/javascript" src="js/jquery.dynatree-1.2.4.js">
         </script>
+        <script type="text/javascript" src="/_ah/channel/jsapi"></script>
         <script type="text/javascript">
             var dg = {{dynamicGlobals|safe}}
             var ev = {{enumValues|safe}}
             var rev = {{reverseEnumValues|safe}}
+            /* googChannel = new  goog.appengine.Channel({{token|safe}});
+            googSocket = googChannel.open();
+            googSocket.onerror = onSocketError;
+            googSocket.onclose = fixSocket;
+            googSocket.onmessage = handleMessage; */
+            
             for (x in dg)
             {
                 if (dg.hasOwnProperty(x))

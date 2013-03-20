@@ -1,6 +1,7 @@
 import webapp2
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
+from google.appengine.api import channel
 import dblayer
 import json
 from ActionVerifications import ActionVerifications
@@ -39,7 +40,9 @@ class IndexHandler(ValidUserRequestHandler):
         committee = self.wbUser.canCreateResolutionIn()
         if committee != None:
             nic = _getNewButton(committee)
+        token = channel.create_channel("%d" % self.wbUser._uId)
         templateValues = {
+            'token': token,
             'dynamicGlobals': gvJson,
             'enumValues': enumsJson,
             'reverseEnumValues': reverseEnumsJson,

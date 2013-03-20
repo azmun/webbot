@@ -403,14 +403,26 @@ function populateResolution(resolution)
         });
 	var possibleSponsors = getPossibleSponsorsByCommittee(resolution.committeeId);
 	possibleSponsors.sort(function(a, b) {
+            var aName, bName;
             if (actualLang == ENGLISH)
             {
-                return a["englishName"] > b["englishName"];
+                aName = a["englishName"];
+                bName = b["englishName"];
             }
             if (actualLang == SPANISH)
             {
-                return a["spanishName"] > b["spanishName"];
+                aName = a["spanishName"];
+                bName = b["spanishName"];
             }
+            if (aName < bName)
+            {
+                return -1;
+            }
+            if (bName < aName)
+            {
+                return 1;
+            }
+            return 0;
         });
 	if (!possibleSponsors || !(possibleSponsors.length))
 	{
@@ -506,7 +518,7 @@ function buildResolutionsTree(resolutions, order, howManyLevels)
     // Now for each resolution res:
     for (var i = 0; i < resolutions.length; ++i)
     {
-        res = resolutions[i];
+        var res = resolutions[i];
         // let c be the minimum of howManyLevels and the 
         // smallest value such that currentLevelElements[c] differs from
         // res[order[c]].
