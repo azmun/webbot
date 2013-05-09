@@ -33,21 +33,13 @@ class InvalidLanguageError(Exception):
     pass
 
 def _getConnection():
-    global conn
-    if conn:
-        return conn
     conn = rdbms.connect(instance=_INSTANCE_NAME, database='webbot')
     return conn
 
-def _commit():
-    global conn
-    logging.info("Trying to commit transaction.")
-    if conn:
-        conn.commit()
-        logging.info("Committing transaction.")
 
 def _getCursor():
-    return _getConnection().cursor()
+    conn = _getConnection()
+    return (conn, conn.cursor())
 
 
 def _getFilterString(tup):
@@ -60,7 +52,7 @@ def _getFilterString(tup):
 def getRPC_ID(lang):
     if lang == BILINGUAL:
         lang = SPANISH
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id FROM Users WHERE role=%s AND language=%s", (User.RPC_ROLE, lang))
     row = cursor.fetchone()
     if not row:
@@ -68,7 +60,7 @@ def getRPC_ID(lang):
     return row[0]
 
 def getCommitteeRapporteurID(committeeId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id FROM Users WHERE committeeId=%s AND role=%s", (committeeId, User.RAPPORTEUR_ROLE))
     row = cursor.fetchone()
     if not row:
@@ -76,7 +68,7 @@ def getCommitteeRapporteurID(committeeId):
     return row[0]
 
 def getTopicAndCommitteeInfo(topicIndex, committeeId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT `index`, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish, englishName, spanishName FROM CommitteeTopics INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE Committees.id=%s AND CommitteeTopics.`index`=%s", (committeeId, topicIndex))
     row = cursor.fetchone()
     if not row:
@@ -84,7 +76,7 @@ def getTopicAndCommitteeInfo(topicIndex, committeeId):
     return {"topic": row[0], "committeeAbbreviationEnglish": row[1], "committeeAbbreviationSpanish": row[2], "committeeDisplayNameEnglish": row[3], "committeeDisplayNameSpanish": row[4], "topicEnglishName": row[5], "topicSpanishName": row[6]}
 
 def getCommitteeLanguage(committeeId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT language FROM Committees WHERE id=%s", committeeId)
     row = cursor.fetchone()
     if not row:
@@ -92,7 +84,7 @@ def getCommitteeLanguage(committeeId):
     return row[0]
 
 def getResolutionInfo(resolutionId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT ownerId, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index`, comments, originalAssigneeId, assigneeId, abbreviationEnglish, abbreviationSpanish, selectedLanguage FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE Resolutions.id=%s", resolutionId)
     row = cursor.fetchone()
     if not row:
@@ -111,7 +103,7 @@ def getUserResolutions(user):
     orderString = string.join(["`%s`" % s for s in user.getConcernedResolutionsOrder()], ", ")
     queryString = "SELECT ownerId, Resolutions.id, serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, committeeId, `status`, Resolutions.`index`, CommitteeTopics.`index` AS topic, assigneeId, comments, originalAssigneeId, abbreviationEnglish, abbreviationSpanish, Countries.englishName, Countries.spanishName, englishLongName, spanishLongName, Countries.id AS countryId, selectedLanguage FROM Resolutions LEFT JOIN (ResolutionSponsors INNER JOIN Countries ON ResolutionSponsors.countryId = Countries.id) ON Resolutions.id = ResolutionSponsors.resolutionId INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id INNER JOIN Committees ON CommitteeTopics.committeeId = Committees.id WHERE " + whereString + " ORDER BY " + orderString
     params = Utils.shallowFlatten([t[2] for t in filt])
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     if len(params):
         logging.info("In getUserResolutions; executing cursor with queryString: %s" % queryString)
         logging.info("Params: %s" % params)
@@ -130,22 +122,22 @@ def getUserResolutions(user):
     return [ret[key] for key in ret]
     
 def getEnglishRPs():
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (ENGLISH, User.RP_ROLE, User.RPC_ROLE))
     return [User.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
 
 def getSpanishRPs():
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (SPANISH, User.RP_ROLE, User.RPC_ROLE))
     return [User.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
 
 def userDefinedTopics(committeeId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT userDefinedTopics FROM Committees WHERE id<=>%s", committeeId)
     return cursor.fetchone()[0]
 
 def getAllCommittees():
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
 #FIXME
     cursor.execute("SELECT englishName, spanishName, englishLongName, spanishLongName, id FROM Countries");
     countries = [{"englishName": row[0], "spanishName": row[1], "englishLongName": row[2], "spanishLongName": row[3], "id": row[4]} for row in cursor.fetchall()]
@@ -191,7 +183,7 @@ def getAllCommittees():
 
 
 def getWebbotUserByEmail(email):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id, fullName, role, committeeId, language FROM Users WHERE email=%s", (email,))
     row = cursor.fetchone()
     if not row:
@@ -200,11 +192,11 @@ def getWebbotUserByEmail(email):
     return User.factory(userId, fullName, role, committeeId, language)
 
 def delete(resolutionId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("DELETE FROM Resolutions WHERE id=%s", (resolutionId,))
 
 def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT language, abbreviationEnglish, abbreviationSpanish, displayNameEnglish, displayNameSpanish FROM Committees WHERE id=%s", (committeeId, ))
     row = cursor.fetchone()
     if not row:
@@ -214,12 +206,12 @@ def getCommitteeHusk(committeeId): # "Husk" because no countries or topics
 
 def getCommitteeTopics(committeeId):
     logging.info("Getting committee topics with id=%s" % committeeId)
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT englishName, spanishName, `index` FROM CommitteeTopics WHERE committeeId=%s ORDER BY `index`", committeeId)
     return [(row[0], row[1], row[2]) for row in cursor.fetchall()]
 
 def createNewResolution(committeeId, index, topic, ownerId):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     spanishResString = None
     englishResString = None
     language = getCommitteeLanguage(committeeId)
@@ -234,21 +226,21 @@ def createNewResolution(committeeId, index, topic, ownerId):
     topicId = topicRow[0]
     cursor.execute("INSERT INTO Resolutions (serializedResolutionObjectEnglish, serializedResolutionObjectSpanish, `status`, `index`, topicId, ownerId) VALUES (%s, %s, %s, %s, %s, %s)", (englishResString, spanishResString, NEW_DRAFT, index, topicId, ownerId))
     cursor.close()
-    _commit()
+    conn.commit()
 
 def createNextTopic(committeeId, english, spanish):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("INSERT INTO CommitteeTopics (committeeId, `index`, spanishName, englishName) VALUES (%s, (SELECT IFNULL(MAX(`index`), 0) + 1 FROM (SELECT * FROM CommitteeTopics) as FuckMySQL WHERE committeeId=%s), %s, %s)", (committeeId, committeeId, spanish, english))
 
 def getCommitteeUsedIndices(committeeId, topic):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT Resolutions.`index` FROM Resolutions INNER JOIN CommitteeTopics ON Resolutions.topicId = CommitteeTopics.id WHERE CommitteeTopics.committeeId=%s AND CommitteeTopics.`index`=%s ORDER BY `index` ASC", (committeeId, topic))
     ret = [row[0] for row in cursor.fetchall()]
     logging.info("Committee %d, topic %d has %d used indices." % (committeeId, topic, len(ret)))
     return ret
 
 def save(ri):
-    cursor = _getCursor()
+    conn, cursor = _getCursor()
     cursor.execute("SELECT id FROM CommitteeTopics WHERE committeeId=%s AND `index`=%s", (ri["committeeId"], ri["topic"]))
     topicRow = cursor.fetchone()
     if not topicRow:
@@ -264,4 +256,4 @@ def save(ri):
     sponsorIds = [(ri["resolutionId"], sponsor["id"]) for sponsor in ri["sponsors"]]
     cursor.executemany("INSERT INTO ResolutionSponsors (resolutionId, countryId) VALUES (%s, %s)", sponsorIds)
     cursor.close()
-    _commit()
+    conn.commit()

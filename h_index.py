@@ -47,9 +47,9 @@ class IndexHandler(ValidUserRequestHandler):
         ntic = ''
         if self.wbUser.canCreateTopics():
             ntic = _getNewTopicButton(committee)
-        token = channel.create_channel("%d" % self.wbUser._uId)
+        # token = channel.create_channel("%d" % self.wbUser._uId)
         templateValues = {
-            'token': token,
+            'token': '',#token,
             'dynamicGlobals': gvJson,
             'enumValues': enumsJson,
             'reverseEnumValues': reverseEnumsJson,

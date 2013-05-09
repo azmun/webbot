@@ -349,7 +349,7 @@
    <text:p text:style-name="P6"/>
    <text:p text:style-name="P6"/>
    <text:p text:style-name="P7">{{subj_of|safe}}:<text:tab/>{{topic|safe}}</text:p>
-   <text:p text:style-name="P7">{{sub_to|safe}}<text:tab/>{{committee|safe}}</text:p>
+   <text:p text:style-name="P7">{{sub_to|safe}}:<text:tab/>{{committee|safe}}</text:p>
    <text:p text:style-name="P7">{{sub_by|safe}}:<text:tab/>{{countries|safe}}</text:p>
    {{outline|safe}}
   </office:text>

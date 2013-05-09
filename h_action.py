@@ -13,8 +13,10 @@ import pdb
 
 def performAction(UId, ri, actionTuple, param):
     oldRI = dblayer.getResolutionInfo(ri['resolutionId'])
-    if not oldRI['ownerId'] == UId:
-        return None, "USER_DOESNT_OWN_RESOLUTION"
+#FIXME
+   # if not oldRI['ownerId'] == UId:
+   #     logging.warn("Fuckup with uid of owner: %d %d" % (oldRI['ownerId'], UId))
+   #     return None, "USER_DOESNT_OWN_RESOLUTION"
     try:
         actionTuple.actionFunc(ri, param)
     except:
