@@ -33,7 +33,7 @@ class InvalidLanguageError(Exception):
     pass
 
 def _getConnection():
-    conn = rdbms.connect(instance=_INSTANCE_NAME, database='webbot')
+    conn = rdbms.connect(instance=_INSTANCE_NAME, database='webbot', charset='utf8')
     return conn
 
 
