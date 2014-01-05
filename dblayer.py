@@ -1,5 +1,6 @@
 from google.appengine.ext import db
 from google.appengine.api import rdbms
+from google.appengine.api import rdbms_mysqldb
 import User
 import logging
 import json
@@ -33,7 +34,12 @@ class InvalidLanguageError(Exception):
     pass
 
 def _getConnection():
-    conn = rdbms.connect(instance=_INSTANCE_NAME, database='webbot', charset='utf8')
+    import os
+    if os.getenv('SETTINGS_MODE') == 'prod':
+        conn = rdbms.connect(instance=_INSTANCE_NAME, database='webbot', charset='utf8')
+    else:
+        rdbms_mysqldb.SetConnectKwargs(host='localhost', port=3306, user='root', passwd='fuckyou')
+        conn = rdbms.connect(instance='MySQL55', db='webbot', charset='utf8')
     return conn
 
 
