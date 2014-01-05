@@ -129,13 +129,13 @@ def getUserResolutions(user):
     
 def getEnglishRPs():
     conn, cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (ENGLISH, User.RP_ROLE, User.RPC_ROLE))
-    return [User.factory(row[0], row[1], row[2], row[3], ENGLISH) for row in cursor.fetchall()]
+    cursor.execute("SELECT id, fullName, role, isAdmin, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (ENGLISH, User.RP_ROLE, User.RPC_ROLE))
+    return [User.factory(row[0], row[1], row[2], row[3], row[4], ENGLISH) for row in cursor.fetchall()]
 
 def getSpanishRPs():
     conn, cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (SPANISH, User.RP_ROLE, User.RPC_ROLE))
-    return [User.factory(row[0], row[1], row[2], row[3], SPANISH) for row in cursor.fetchall()]
+    cursor.execute("SELECT id, fullName, role, isAdmin, committeeId FROM Users WHERE language=%s AND role IN (%s, %s)", (SPANISH, User.RP_ROLE, User.RPC_ROLE))
+    return [User.factory(row[0], row[1], row[2], row[3], row[4], SPANISH) for row in cursor.fetchall()]
 
 def userDefinedTopics(committeeId):
     conn, cursor = _getCursor()
@@ -190,12 +190,12 @@ def getAllCommittees():
 
 def getWebbotUserByEmail(email):
     conn, cursor = _getCursor()
-    cursor.execute("SELECT id, fullName, role, committeeId, language FROM Users WHERE email=%s", (email,))
+    cursor.execute("SELECT id, fullName, role, isAdmin, committeeId, language FROM Users WHERE email=%s", (email,))
     row = cursor.fetchone()
     if not row:
         raise NoSuchUserError()
-    (userId, fullName, role, committeeId, language) = (row[0], row[1], row[2], row[3], row[4])
-    return User.factory(userId, fullName, role, committeeId, language)
+    (userId, fullName, role, isAdmin, committeeId, language) = (row[0], row[1], row[2], row[3], row[4], row[5])
+    return User.factory(userId, fullName, role, isAdmin, committeeId, language)
 
 def delete(resolutionId):
     conn, cursor = _getCursor()

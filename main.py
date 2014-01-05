@@ -7,9 +7,11 @@ import h_new
 import h_new_topic
 import h_do_new_topic
 import h_generate
+import h_admin_gateway
 
 app = webapp2.WSGIApplication(
         [('/', h_index.IndexHandler),
+         ('/admin', h_admin_gateway.AdminGatewayHandler),
          ('/action', h_action.ActionHandler),
          ('/do_new', h_do_new.DoNewHandler),
          ('/new_resolution', h_new.NewHandler),

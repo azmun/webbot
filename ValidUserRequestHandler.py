@@ -4,9 +4,13 @@ from google.appengine.api import users
 import dblayer
 import json
 
+SUCCESS = 0
 class ValidUserRequestHandler(webapp2.RequestHandler):
-    def writeInvalidUser(self):
-        self.response.out.write('<html><body><p>This e-mail account is not authorized to access this application.</p><p><a href="%s">logout</a></p></body></html>' % users.create_logout_url('/'))
+    def writeInvalidUser(self, msg=None):
+        messageTemplate = '<html><body><p>%s</p><p><a href="%s">logout</a></p></body></html>' 
+        if not msg:
+            msg = "This e-mail account is not authorized to access this application."
+        self.response.out.write(messageTemplate % (msg, users.create_logout_url('/')))
     def writeNotLoggedIn(self):
         loginURL = users.create_login_url('/')
         logging.info("User not logged in, redirecting to: %s" % loginURL)
@@ -20,10 +24,18 @@ class ValidUserRequestHandler(webapp2.RequestHandler):
             return False, resp
         try:
             self.wbUser = dblayer.getWebbotUserByEmail(gaeUser.email())
+            validationCode = self.validateUser(self.wbUser)
+            if validationCode != SUCCESS:
+                self.writeInvalidUser(self.getValidationErrorMsg(validationCode))
+                return False, None
         except dblayer.NoSuchUserError:
             self.writeInvalidUser()
             return False, None
         return True, None
+    def validateUser(self, _):
+        return SUCCESS
+    def getValidationErrorMsg(self, validationCode):
+        return "Unknown error"
     def get(self):
         success, resp = self.userGuard()
         if success:

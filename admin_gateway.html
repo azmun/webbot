@@ -1,0 +1,11 @@
+<html>
+	<head><title>MUN resolution processor admin gateway</title></head>
+	<body>
+		<h1>Administrator Tools</h1>
+		<ul>
+		  {% for link in links %}
+		  <li><a href="{{link.url|safe}}">{{link.name|safe}}</a></li>
+			{% endfor %}
+		</ul>
+	</body>
+</html>
